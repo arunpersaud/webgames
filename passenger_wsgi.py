@@ -13,6 +13,8 @@ from pathlib import Path
 
 application = Flask(__name__)
 
+BOGGLE_TIME = 5 * 60
+
 
 @application.route("/")
 def main():
@@ -82,30 +84,37 @@ def load_boggle(gen_func, filename):
         boggle_text = gen_func()
         with FILE.open("w") as f:
             f.write(boggle_text)
+        dt = 0
     else:
         now = time.time()
         last = FILE.stat().st_mtime
-        if now - last > 30:
+        dt = now - last
+        if now - last > BOGGLE_TIME:
             boggle_text = gen_func()
             with FILE.open("w") as f:
                 f.write(boggle_text)
+            dt = 0
         else:
             with FILE.open("r") as f:
                 boggle_text = f.read()
     boggle_text = boggle_text.split(",")
-    return boggle_text
+    return boggle_text, dt
 
 
 @application.route("/boggle")
 def boggle_4x4():
-    boggle_text = load_boggle(generate_4x4, "4x4.txt")
-    return render_template("boggle.html", seconds=30, boggle=boggle_text, size=4)
+    boggle_text, dt = load_boggle(generate_4x4, "4x4.txt")
+    return render_template(
+        "boggle.html", seconds=int(BOGGLE_TIME - dt), boggle=boggle_text, size=4
+    )
 
 
 @application.route("/big_boggle")
 def boggle_5x5():
-    boggle_text = load_boggle(generate_5x5, "5x5.txt")
-    return render_template("boggle.html", seconds=30, boggle=boggle_text, size=5)
+    boggle_text, dt = load_boggle(generate_5x5, "5x5.txt")
+    return render_template(
+        "boggle.html", seconds=int(BOGGLE_TIME - dt), boggle=boggle_text, size=5
+    )
 
 
 @application.route("/doko")
