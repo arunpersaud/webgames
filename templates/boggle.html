@@ -22,7 +22,7 @@
     {% for i in range(size) %}
     <tr>
       {% for j in range(size) %}
-      {% if lower(boggle[i+size*j]) == 'qu' %}
+      {% if boggle[i+size*j] == 'Qu' %}
       <td class="highlight">{{ boggle[i+size*j] }}</td>
       {% else %}
       <td>{{ boggle[i+size*j] }}</td>
