@@ -1,0 +1,34 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Boggle with video conferences</title>
+  <meta name="description" content="Playing boggle with video conference support">
+  <meta name="author" content="Arun Persaud">
+
+  <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}?v=1.0">
+
+</head>
+
+<body>
+
+  <h1> Playing Boggle with video conferences support</h1>
+
+  Next game in <span id="time">{{ seconds }}</span> seconds.
+
+  <table id="boggle">
+    {% for i in range(size) %}
+    <tr>
+      {% for j in range(size) %}
+      <td>{{ boggle[i+size*j] }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+  <script src="{{url_for('static', filename='boggle.js')}}"></script>
+</body>
+</html>
