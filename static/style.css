@@ -12,3 +12,7 @@ html, body {
     vertical-align:top;
     min-height:30px;
 }
+
+#boggle td.highlight {
+    color: red;
+}
