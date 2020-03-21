@@ -16,4 +16,9 @@ html, body {
 
 #boggle td.highlight {
     color: red;
+    background-color: grey;
+}
+
+footer {
+   font-size: small;
 }

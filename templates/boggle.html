@@ -14,9 +14,11 @@
 
 <body>
 
-  <h1> Playing Boggle with video conferences support</h1>
+  <h1> Playing Boggle with video conference support</h1>
 
-  Next game in <span id="time">{{ seconds }}</span> seconds.
+  <p>How to play: have everyone you want to play with connected via video or voice chat. Check that the count down is in sync (otherwise reload the page). Wait until the counter gets to zero and reloads the page. Have someone start a timer... start playing, score, repeat</p>
+  
+  <p>Next game in <span id="time">{{ seconds }}</span> seconds.</p>
 
   <table id="boggle">
     {% for i in range(size) %}
