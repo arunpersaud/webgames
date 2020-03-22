@@ -11,10 +11,14 @@ Vision: Webify common board games so friends can play with each other using the 
 
 
 ## Games:
-* Boggle clone: In Progress
+* Boggle clone:
 ** Standard (4x4)
 ** Big(5x5)
-* Stadt: Not started
-* Land: Not started
-* Fluss: Not started
+* Doppelkopf
 
+
+# Source
+The source can be found on [https://github.com/arunpersaud/webgames](github). Pull request welcomed.
+We use black to format the code, to make sure your code is formatted correctly, you can do the following once before you run git commit:
+* pip install pre-commit
+* pre-commit install
