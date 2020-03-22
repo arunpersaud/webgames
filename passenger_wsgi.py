@@ -127,7 +127,7 @@ def doko(seed=None, player=None):
         tag = "{} {}".format(seed, player)
         FILE = Path("tmp") / "doko.db"
         if FILE.exists():
-            with FILE.open('r') as f:
+            with FILE.open("r") as f:
                 for l in f:
                     if l.startswith(tag):
                         return render_template("doko-single-error.html")
@@ -143,10 +143,10 @@ def doko(seed=None, player=None):
         elif player == "D":
             cards = cards[36:]
         # normalize to just the odd numbers
-        cards = [2*(c//2)+1 for c in cards]
+        cards = [2 * (c // 2) + 1 for c in cards]
         cards = sorted(cards)
         cards = ["doko/{}.png".format(c) for c in cards]
-        with FILE.open('a') as f:
+        with FILE.open("a") as f:
             f.write("{}\n".format(tag))
         return render_template("doko-game.html", cards=cards)
 
