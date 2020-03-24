@@ -32,6 +32,7 @@ def getParams(letter):
   params["font"] = "helvetica-bold"
   params["xdim"] = 100
   params["ydim"] = 100
+  params["filename"] = "tile_{letter}.png".format(letter=letter)
 
   return params
 
@@ -41,7 +42,7 @@ def genCommand(params):
                       " -gravity center"
                       " -border 4 -bordercolor darkgreen"
                       " -pointsize {point_size}"
-                      " -size {xdim}x{ydim} label:{letter} tile_{letter}.png")
+                      " -size {xdim}x{ydim} label:{letter} {filename}")
   return command_template.format(**params)
                       
 
