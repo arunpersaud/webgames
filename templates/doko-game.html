@@ -27,10 +27,10 @@
     <li>At the end, count the points in each pile, compare and add up. repeat</li>
   </ul>
 
-  <form method="POST">
-    <input name="name">
-    <input type="submit">
-  </form>
-  
+  <p> your cards are: </p>
+  {% for c in cards %}
+    <img class="card" src="{{url_for('static', filename=c)}}"></img>
+  {% endfor %}
+    
 </body>
 </html>
