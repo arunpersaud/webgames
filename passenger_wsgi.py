@@ -15,6 +15,23 @@ application = Flask(__name__)
 
 BOGGLE_TIME = 5 * 60
 
+from flask import make_response
+from functools import wraps, update_wrapper
+from datetime import datetime
+from werkzeug.http import http_date
+
+def nocache(view):
+    @wraps(view)
+    def no_cache(*args, **kwargs):
+        response = make_response(view(*args, **kwargs))
+        response.headers['Last-Modified'] = http_date(datetime.now())
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '-1'
+        return response
+
+    return update_wrapper(no_cache, view)
+
 
 @application.route("/")
 def main():
@@ -98,6 +115,8 @@ def generate_boggle_file(gen_func, filename):
 
 def load_boggle(filename):
     FILE = Path("tmp") / filename
+    if not FILE.exists():
+        return "" , 0
     with FILE.open("r") as f:
         boggle_text = f.read()
     boggle_text = boggle_text.split(",")
@@ -106,22 +125,23 @@ def load_boggle(filename):
 
 
 @application.route("/boggle/<size>/<seed>/start")
+@nocache
 def start_boggle(size, seed):
     if size == "4x4":
         generate_boggle_file(generate_4x4, "{}-{}.txt".format(seed, size))
     else:
         generate_boggle_file(generate_5x5, "{}-{}.txt".format(seed, size))
-    return ""
+    return "{started: 1}"
 
 
 @application.route("/boggle/<size>/<seed>/update")
+@nocache
 def create_boggle(size, seed):
     FILE = Path("tmp") / "{}-{}.txt".format(seed, size)
     if not FILE.exists():
         return "{-2}"
 
     last = int(FILE.stat().st_mtime)
-
     return str(last)
 
 
