@@ -17,14 +17,14 @@
   <h1> Playing Boggle with video conference support</h1>
 
   <p>How to play: have everyone you want to play with connected via video or voice chat. Check that the count down is in sync (otherwise reload the page). Wait until the counter gets to zero and reloads the page. Have someone start a timer... start playing, score, repeat</p>
-  
+
   <p>Next game in <span id="time">{{ seconds }}</span> seconds.</p>
 
   <table id="boggle">
     {% for i in range(size) %}
     <tr>
       {% for j in range(size) %}
-      <td><img src="static/images/tile_{{boggle[i+size*j]}}.png"></td>
+      <td><img src="{{url_for('static', filename='/images/tile_{}.png'.format(boggle[i+size*j]))}}"></td>
       {% endfor %}
     </tr>
     {% endfor %}
@@ -33,8 +33,8 @@
   <footer>
     copyright 2020 Arun Persaud, code available on <a href="https://github.com/arunpersaud/webgames">github</a>.
   </footer>
-  
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="{{url_for('static', filename='boggle.js')}}"></script>
 </body>
 </html>
