@@ -24,11 +24,7 @@
     {% for i in range(size) %}
     <tr>
       {% for j in range(size) %}
-      {% if boggle[i+size*j] == 'Qu' %}
-      <td class="highlight">{{ boggle[i+size*j] }}</td>
-      {% else %}
-      <td>{{ boggle[i+size*j] }}</td>
-      {% endif %}
+      <td><img src="static/images/tile_{{boggle[i+size*j]}}.png"></td>
       {% endfor %}
     </tr>
     {% endfor %}
