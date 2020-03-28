@@ -1,10 +1,21 @@
-var timer_span = $("#time");
+var pagetimer = $("#timer");
+var age = $("#age");
 
-function update_timer() {
-    var value = Number(timer_span.text());
-    timer_span.text(value-1);
-    if (value <=0)
-	location.reload();
+async function update_page() {
+    let response = await fetch(window.location.href+'/update');
+    let data = await response.json();
+    if (data > 0) {
+	var current = Number(age.html());
+	if (data > current)
+	    location.reload();
+    }
+
+    var value = Number(pagetimer.html());
+    pagetimer.html(value-1);
 }
 
-var setTime = setInterval( update_timer, 1000 );
+function start_game() {
+    fetch(window.location.href+'/start');
+}
+
+var setTime = setInterval( update_page, 1000 );

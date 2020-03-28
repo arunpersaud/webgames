@@ -6,7 +6,7 @@ INTERP = "/home/arun/bin/python3.8"
 if sys.executable != INTERP:
     os.execl(INTERP, INTERP, *sys.argv)
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import time
 import random
 from pathlib import Path
@@ -78,43 +78,89 @@ def generate_5x5():
     return boggle_text
 
 
-def load_boggle(gen_func, filename):
+def boggle_cleanup_tmp():
+    DIR = Path("tmp")
+    now = time.time()
+    for f in DIR.glob("*?x?.txt"):
+        t = int(f.stat().st_mtime)
+        # delete everything older than 1h
+        if now - t > 60 * 60:
+            f.unlink()
+
+
+def generate_boggle_file(gen_func, filename):
+    boggle_cleanup_tmp()
     FILE = Path("tmp") / filename
-    if not FILE.exists():
-        boggle_text = gen_func()
-        with FILE.open("w") as f:
-            f.write(boggle_text)
-        dt = 0
-    else:
-        now = time.time()
-        last = FILE.stat().st_mtime
-        dt = now - last
-        if now - last > BOGGLE_TIME:
-            boggle_text = gen_func()
-            with FILE.open("w") as f:
-                f.write(boggle_text)
-            dt = 0
-        else:
-            with FILE.open("r") as f:
-                boggle_text = f.read()
+    boggle_text = gen_func()
+    with FILE.open("w") as f:
+        f.write(boggle_text)
+
+
+def load_boggle(filename):
+    FILE = Path("tmp") / filename
+    with FILE.open("r") as f:
+        boggle_text = f.read()
     boggle_text = boggle_text.split(",")
-    return boggle_text, dt
+    t = int(FILE.stat().st_mtime)
+    return boggle_text, t
 
 
+@application.route("/boggle/<size>/<seed>/start")
+def start_boggle(size, seed):
+    if size == "4x4":
+        generate_boggle_file(generate_4x4, "{}-{}.txt".format(seed, size))
+    else:
+        generate_boggle_file(generate_5x5, "{}-{}.txt".format(seed, size))
+    return ""
+
+
+@application.route("/boggle/<size>/<seed>/update")
+def create_boggle(size, seed):
+    FILE = Path("tmp") / "{}-{}.txt".format(seed, size)
+    if not FILE.exists():
+        return "{-2}"
+
+    last = int(FILE.stat().st_mtime)
+
+    return str(last)
+
+
+@application.route("/boggle", methods=["POST"])
+def create_boggle_game():
+    seed = request.form["name"].lower()
+    seed = seed.replace(" ", "")
+    out = ""
+    for s in seed:
+        if s.isalnum():
+            out += s
+    seed = out
+
+    size = int(request.form["size"])
+
+    if size == 4:
+        generate_boggle_file(generate_4x4, "{}-4x4.txt".format(seed))
+        return redirect("/boggle/4x4/{}".format(seed))
+    elif size == 5:
+        generate_boggle_file(generate_5x5, "{}-5x5.txt".format(seed))
+        return redirect("/boggle/5x5/{}".format(seed))
+
+
+@application.route("/boggle/<size>/<seed>")
 @application.route("/boggle")
-def boggle_4x4():
-    boggle_text, dt = load_boggle(generate_4x4, "4x4.txt")
-    return render_template(
-        "boggle.html", seconds=int(BOGGLE_TIME - dt), boggle=boggle_text, size=4
-    )
+def boggle_4x4(seed=None, size="4x4"):
 
+    if seed is not None:
+        if size == "4x4":
+            s = 4
+        else:
+            s = 5
 
-@application.route("/big_boggle")
-def boggle_5x5():
-    boggle_text, dt = load_boggle(generate_5x5, "5x5.txt")
-    return render_template(
-        "boggle.html", seconds=int(BOGGLE_TIME - dt), boggle=boggle_text, size=5
-    )
+        boggle_text, t = load_boggle("{}-{}.txt".format(seed, size))
+        return render_template(
+            "boggle.html", boggle=boggle_text, fileage=t, size=s, seed=seed
+        )
+
+    return render_template("boggle-start.html", seed=seed)
 
 
 @application.route("/doko")

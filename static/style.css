@@ -19,6 +19,10 @@ html, body {
     background-color: grey;
 }
 
+button#age {
+    display: none;
+}
+
 footer {
    font-size: small;
 }
