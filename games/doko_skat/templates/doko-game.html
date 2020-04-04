@@ -8,12 +8,11 @@
   <meta name="description" content="A list of games you can play using a video conference">
   <meta name="author" content="Arun Persaud">
 
-  <link rel="stylesheet" href="css/styles.css?v=1.0">
+  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}?v=1.0">
 
 </head>
 
 <body>
-  <script src="js/scripts.js"></script>
   <h1>Doppelkopf</h1>
 
   <h3>How to play Doko:</h3>
@@ -27,12 +26,10 @@
     <li>At the end, count the points in each pile, compare and add up. repeat</li>
   </ul>
 
-  <ul>
-    <li> <a href="doko/{{seed}}/A">Player A</a> </li>
-    <li> <a href="doko/{{seed}}/B">Player B</a> </li>
-    <li> <a href="doko/{{seed}}/C">Player C</a> </li>
-    <li> <a href="doko/{{seed}}/D">Player D</a> </li>
-  </ul>
-
+  <p> your cards are: </p>
+  {% for c in cards %}
+    <img class="card" src="{{url_for('doko_skat.static', filename=c)}}"></img>
+  {% endfor %}
+    
 </body>
 </html>
