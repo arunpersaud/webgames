@@ -5,14 +5,15 @@ import time
 import random
 
 boggle = Blueprint(
-    'boggle',
+    "boggle",
     __name__,
-    template_folder='templates',
-    static_folder='static',
-    static_url_path='/games/boggle/static'
+    template_folder="templates",
+    static_folder="static",
+    static_url_path="/games/boggle/static",
 )
 
 BOGGLE_TIME = 5 * 60
+
 
 def generate_4x4():
     letters = [
@@ -70,6 +71,7 @@ def generate_5x5():
     boggle_text = ",".join([random.choice(l) for l in letters])
     return boggle_text
 
+
 def boggle_cleanup_tmp():
     DIR = Path("tmp")
     now = time.time()
@@ -91,7 +93,7 @@ def generate_boggle_file(gen_func, filename):
 def load_boggle(filename):
     FILE = Path("tmp") / filename
     if not FILE.exists():
-        return "" , 0
+        return "", 0
     with FILE.open("r") as f:
         boggle_text = f.read()
     boggle_text = boggle_text.split(",")
@@ -156,4 +158,3 @@ def boggle_4x4(seed=None, size="4x4"):
         )
 
     return render_template("boggle-start.html", seed=seed)
-

@@ -9,6 +9,7 @@
   <meta name="author" content="Arun Persaud">
 
   <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}?v=1.0">
+  <link rel="stylesheet" href="{{url_for('boggle.static', filename='boggle.css')}}?v=1.0">
 
 </head>
 
@@ -25,11 +26,13 @@
     </ul>
   </p>
 
-  <button onclick="start_game()">Start</button>
+  
+  <button onclick="start_game()">New Game</button>
+  <button onclick="rotate(-1)">Rotate Left</button>
+  <button onclick="rotate(1)">Rotate Right</button>
+  Timer: <span id="timer"> 180 </span>
 
-  <button id="timer"> 180 </button>
-
-  <table id="boggle">
+  <table id="boggle" class="degree_0">
     {% for i in range(size) %}
     <tr>
       {% for j in range(size) %}
