@@ -1,35 +1,14 @@
-<!doctype html>
-
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-
-  <title>Doko with video conferences</title>
-  <meta name="description" content="A list of games you can play using a video conference">
-  <meta name="author" content="Arun Persaud">
-
-  <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}?v=1.0">
-
-</head>
-
-<body>
+{% extends "base.html"%}
+{% block title %}Doko with video conferences{% endblock%}
+{% block content %}
   <h1>Doppelkopf</h1>
 
-  <h3>How to play Doko:</h3>
-  <ul>
-    <li>Find 4 players, start a video conference. Every player will need a deck of cards</li>
-    <li>All players enter the same text in the field below</li>
-    <li>The next page will show 4 links. These pages are only shown once. Agree which player clicks on which links</li>
-    <li>Pick the cards you are shown out of the deck, put the remaining cards away</li>
-    <li>Start playing by showing the card you are playing in the video stream</li>
-    <li>Every player makes four piles and puts his card on the pile of the person who won the trick</li>
-    <li>At the end, count the points in each pile, compare and add up. repeat</li>
-  </ul>
+  {% include "howto.html" %}
 
+  <p> Enter the name for a new session: </p>
   <form method="POST">
     <input name="name">
-    <input type="submit">
+    <input type="submit" value="Start session">
   </form>
 
-</body>
-</html>
+{% endblock%}

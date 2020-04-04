@@ -1,0 +1,21 @@
+#boggle {
+    margin: 0 auto;
+    font-size: xx-large;
+}
+
+#boggle td {
+    width: 30px;
+    display:table-cell;
+    vertical-align:top;
+    min-height:30px;
+    text-align:center;
+}
+
+#boggle td.highlight {
+    color: red;
+    background-color: grey;
+}
+
+button#age {
+    display: none;
+}

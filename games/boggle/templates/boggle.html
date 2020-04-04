@@ -1,20 +1,9 @@
-<!doctype html>
-
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-
-  <title>Boggle with video conferences</title>
-  <meta name="description" content="Playing boggle with video conference support">
-  <meta name="author" content="Arun Persaud">
-
-  <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}?v=1.0">
+{% extends "base.html" %}
+{% block title %}Boggle with video conferences{% endblock%}
+{% block css %}
   <link rel="stylesheet" href="{{url_for('boggle.static', filename='boggle.css')}}?v=1.0">
-
-</head>
-
-<body>
-
+{% endblock%}
+{% block content %}
   <h1> Playing Boggle with video conference support</h1>
 
   <p>How to play:
@@ -43,12 +32,8 @@
   </table>
 
   <button id="age"> {{ fileage }} </button>
-
-  <footer>
-    Copyright 2020 Arun Persaud, Sean Brennan. Code available on <a href="https://github.com/arunpersaud/webgames">github</a>.
-  </footer>
-
+{% endblock%}
+{% block javascript %}
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="{{url_for('boggle.static', filename='boggle.js')}}"></script>
-</body>
-</html>
+{% endblock%}

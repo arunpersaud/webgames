@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>{% block title %}Games with video conferences{% endblock %}</title>
+  <meta name="description" content="A list of games you can play using a video conference">
+  <meta name="author" content="Arun Persaud">
+
+  <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}?v=1.0">
+  {% block css %}{% endblock %}
+</head>
+
+<body>
+  {% block content %}
+  <h1> List of Games for pure videoconferences </h1>
+  <ul>
+    <li>Boggle</li>
+    <li>Stadt, Land, Fluss</li>
+  </ul>
+  <h1> List of Games with web page support</h1>
+  <ul>
+    <li><a href="/boggle">Boggle (4x4, 5x5)</a></li>
+    <li><a href="/doko">Doko</a></li>
+  </ul>
+
+  <h1> List of online games by other people</h1>
+  <ul>
+    <li><a href="https://www.horsepaste.com/examinations">Codenames</a></li>
+  </ul>
+
+  {% endblock %}
+  <footer>
+    Copyright 2020 Arun Persaud, Sean Brennan. Code available on <a href="https://github.com/arunpersaud/webgames">github</a>.
+  </footer>
+
+  {% block javascript %}{% endblock %}
+
+</body>
+</html>
