@@ -13,45 +13,74 @@ doko_skat = Blueprint(
     static_url_path="/games/doko_skat/static",
 )
 
+def get_doko_cards(seed, nr, player):
+    random.seed(seed+str(nr))
+    cards = list(range(48))
+    random.shuffle(cards)
+    if player == "A":
+        cards = cards[:12]
+    elif player == "B":
+        cards = cards[12:24]
+    elif player == "C":
+        cards = cards[24:36]
+    elif player == "D":
+        cards = cards[36:]
+    # normalize to just the odd numbers
+    cards = [2 * (c // 2) + 1 for c in cards]
+    cards = sorted(cards)
+    cards = ["doko/{}.png".format(c) for c in cards]
+    return cards
 
-@doko_skat.route("/doko")
-@doko_skat.route("/doko", methods=["POST"])
-@doko_skat.route("/doko/<seed>/<nr>/")
-@doko_skat.route("/doko/<seed>/<nr>/<player>")
-def doko(seed=None, player=None, nr=1):
+def get_skat_cards(seed, nr, player):
+    random.seed(seed+str(nr))
+    cards = list(range(32))
+    random.shuffle(cards)
+    if player == "A":
+        cards = cards[:10]
+    elif player == "B":
+        cards = cards[10:20]
+    elif player == "C":
+        cards = cards[20:30]
+    elif player == "skat":
+        cards = cards[30:]
+    # normalize to just the odd numbers
+    cards = sorted(cards)
+    cards = ["skat/{}.png".format(c) for c in cards]
+    return cards
+        
+@doko_skat.route("/<game_type>")
+@doko_skat.route("/<game_type>", methods=["POST"])
+@doko_skat.route("/<game_type>/<seed>/<nr>/")
+@doko_skat.route("/<game_type>/<seed>/<nr>/<player>")
+def doko(game_type="doko", seed=None, player=None, nr=1):
     nr = int(nr)
+
+    SKAT = {'title': "Skat", 'link': 'skat'}
+    DOKO = {'title': "Doppelkopf", 'link': 'doko'}
+
+    if game_type == "doko":
+        game = DOKO
+        FILE = Path("tmp") / f"doko.db"
+    else:
+        FILE = Path("tmp") / f"skat.db"
+        game = SKAT
     
     if player is not None:
-        tag = "{} {} {}".format(seed, player, nr)
-        FILE = Path("tmp") / "doko.db"
+        tag = f"{seed} {player} {nr}"
         if FILE.exists():
             with FILE.open("r") as f:
                 for l in f:
                     if l.startswith(tag):
-                        return render_template("doko-single-error.html")
+                        return render_template("doko-single-error.html", game=game)
 
-        now = datetime.datetime.now()
-        midnight = datetime.datetime.combine(now.date(), datetime.time())
-        seconds = (now - midnight).seconds
+        if game_type == "doko":
+            cards = get_doko_cards(seed, nr, player)
+        else:
+            cards = get_skat_cards(seed, nr, player)
 
-        random.seed(seed+str(nr))
-        cards = list(range(48))
-        random.shuffle(cards)
-        if player == "A":
-            cards = cards[:12]
-        elif player == "B":
-            cards = cards[12:24]
-        elif player == "C":
-            cards = cards[24:36]
-        elif player == "D":
-            cards = cards[36:]
-        # normalize to just the odd numbers
-        cards = [2 * (c // 2) + 1 for c in cards]
-        cards = sorted(cards)
-        cards = ["doko/{}.png".format(c) for c in cards]
         with FILE.open("a") as f:
             f.write("{}\n".format(tag))
-        return render_template("doko-game.html", cards=cards, nr=nr, seed=seed, player=player)
+        return render_template("doko-game.html", cards=cards, nr=nr, seed=seed, player=player, game=game)
 
     if request.method == "POST":
         seed = request.form["name"].lower()
@@ -61,18 +90,21 @@ def doko(seed=None, player=None, nr=1):
             if s.isalnum():
                 out += s
         seed = out
-        return redirect("/doko/{}/{}".format(seed, nr))
+        return redirect(f"/{game_type}/{seed}/{nr}")
 
     if seed is not None:
-        players = {'A': False, 'B': False, 'C': False, 'D': False}
+        if game_type == "doko":
+            players = {'A': False, 'B': False, 'C': False, 'D': False}
+        else:
+            players = {'A': False, 'B': False, 'C': False, 'skat': False}
         for player in players:
-            tag = "{} {} {}".format(seed, player, nr)
-            FILE = Path("tmp") / "doko.db"
+            tag = f"{seed} {player} {nr}"
             if FILE.exists():
                 with FILE.open("r") as f:
                     for l in f:
                         if l.startswith(tag):
                             players[player] = True
-        return render_template("doko-start.html", seed=seed, nr=nr, players=players)
+        return render_template("doko-start.html", seed=seed, nr=nr, players=players, game=game)
 
-    return render_template("doko.html")
+    return render_template("doko.html", game=game)
+

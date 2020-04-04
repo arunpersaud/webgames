@@ -1,10 +1,14 @@
-{% extends "base.html"%}
-{% block title %}Doko with video conferences{% endblock%}
+{% extends "base.html" %}
+{% block title %}{{game.title}} with video conferences{% endblock %}
 {% block content %}
-  <h1>Doppelkopf</h1>
+  <h1>{{game.title}}</h1>
 
-  {% include "howto.html" %}
-  
-  <p>This hand has already been used, please try another <a href="/doko">game name</a>.</p>
+  {% if game.link == "doko" %}
+  {% include "howto_doko.html" %}
+  {% elif game.link == "skat" %}
+  {% include "howto_skat.html" %}
+  {% endif %}
 
-{% endblock%}
+  <p>This hand has already been used, please try another <a href="/{{game.link}}">game name</a>.</p>
+
+{% endblock %}

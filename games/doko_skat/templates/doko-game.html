@@ -1,10 +1,13 @@
 {% extends "base.html"%}
-{% block title %}Doko with video conferences{% endblock%}
+{% block title %}{{game.title}} with video conferences{% endblock%}
+{% block css %}
+  <link rel="stylesheet" href="{{url_for('doko_skat.static', filename='cards.css')}}?v=1.0">
+{% endblock%}
 {% block content %}
-  <h1>Doppelkopf</h1>
+  <h1>{{game.title}}</h1>
 
   <h3>Next game</h3>
-  Click <a href="/doko/{{seed}}/{{nr+1}}/{{player}}">here</a> to see your next hand.
+  Click <a href="/{{game.link}}/{{seed}}/{{nr+1}}/{{player}}">here</a> to see your next hand.
   (Only click this once you finished the current game, since you will not be able to reload this page).
 
   <h3>Game number {{nr}} in '{{seed}}'</h3>
@@ -14,6 +17,10 @@
     <img class="card" src="{{url_for('doko_skat.static', filename=c)}}"></img>
   {% endfor %}
 
-  {% include "howto.html" %}
+  {% if game.link == "doko" %}
+  {% include "howto_doko.html" %}
+  {% elif game.link == "skat" %}
+  {% include "howto_skat.html" %}
+  {% endif %}
 
 {% endblock%}

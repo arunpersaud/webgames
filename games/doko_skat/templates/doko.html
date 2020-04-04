@@ -1,9 +1,13 @@
 {% extends "base.html"%}
-{% block title %}Doko with video conferences{% endblock%}
+{% block title %}{{game.title}} with video conferences{% endblock%}
 {% block content %}
-  <h1>Doppelkopf</h1>
+  <h1>{{game.title}}</h1>
 
-  {% include "howto.html" %}
+  {% if game.link == "doko" %}
+  {% include "howto_doko.html" %}
+  {% elif game.link == "skat" %}
+  {% include "howto_skat.html" %}
+  {% endif %}
 
   <p> Enter the name for a new session: </p>
   <form method="POST">
@@ -12,3 +16,4 @@
   </form>
 
 {% endblock%}
+  
