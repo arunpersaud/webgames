@@ -12,5 +12,3 @@ app.register_blueprint(doko_skat)
 @app.route("/")
 def main():
     return render_template("index.html")
-
-

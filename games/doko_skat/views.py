@@ -5,12 +5,13 @@ import time
 import random
 
 doko_skat = Blueprint(
-    'doko_skat',
+    "doko_skat",
     __name__,
-    template_folder='templates',
-    static_folder='static',
-    static_url_path='/games/doko_skat/static'
+    template_folder="templates",
+    static_folder="static",
+    static_url_path="/games/doko_skat/static",
 )
+
 
 @doko_skat.route("/doko")
 @doko_skat.route("/doko", methods=["POST"])
@@ -58,4 +59,3 @@ def doko(seed=None, player=None):
         return render_template("doko-start.html", seed=seed)
 
     return render_template("doko.html")
-
