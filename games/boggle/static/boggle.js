@@ -24,9 +24,12 @@ var setTime = setInterval( update_page, 1000 );
 var step = 0 ;
 function rotate(d) {
     step += d;
-    console.log(step);
     boggle.css('transform', 'rotate('+ step*90 +'deg)');
-//    var d = boggle.width() - boggle.height();
-//    boggle.css('margin-left', -d/2*(step%2));
-//    boggle.css('margin-top',   d/2*(step%2));
+}
+
+function rotate_tiles() {
+    $('#boggle td img').each(function() {
+	var orientation = Math.floor(Math.random() * 4);
+	$(this).css('transform', 'rotate('+ orientation*90 +'deg)');
+    });
 }
