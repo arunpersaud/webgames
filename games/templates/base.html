@@ -13,6 +13,19 @@
 </head>
 
 <body>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+     <div class="flashes">
+      <ul>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+      </div>
+    {% endif %}
+  {% endwith %}
+
   {% block content %}
   <h1> List of Games for pure videoconferences </h1>
   <ul>
