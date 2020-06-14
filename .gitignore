@@ -3,3 +3,4 @@
 tmp
 public
 __pycache__
+.mypy_cache
