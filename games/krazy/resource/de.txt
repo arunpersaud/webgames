@@ -1,0 +1,4 @@
+{"consonants": ["g","h","k","j", "w","r","t","y","p","z","c","b","n","m"],
+ "vocals": ["a","e","i","o"],
+ "words": ["Insel", "buch", "auto", "tech firma", "pflanze"]
+}

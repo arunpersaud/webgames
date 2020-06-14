@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Krazy Words with video conferences{% endblock%}
+{% block content %}
+<h1> Playing Krazy Words with video conference support</h1>
+
+<h2> End of Round </h2>
+
+<table>
+  <tr>
+    <th> player \ words </th>
+    {% for w in words %}
+    <th>{{w}}</th>
+    {% endfor %}
+  </tr>
+  {% for p in guesses %}
+  <tr>
+  {% for e in p %}
+  <td style="border:1px solid #aaa;">{{e}}</td>
+  {% endfor %}
+  </tr>
+  {% endfor %}
+  <table>
+
+  <p>Please reload when all players made their guesses.</p>
+
+  <p>To start a new round, please visit the <a href="/krazy">starting page</a> again. This
+  will reset the game, so only use the link once you are done with the
+  current round.</p>
+
+{% endblock %}

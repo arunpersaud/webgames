@@ -17,3 +17,13 @@ def nocache(view):
         return response
 
     return update_wrapper(no_cache, view)
+
+
+def ensure_alphanum(input: str):
+    input = input.lower()
+    input = input.replace(" ", "")
+    out = ""
+    for s in input:
+        if s.isalnum():
+            out += s
+    return out

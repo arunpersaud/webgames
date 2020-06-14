@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Krazy Words with video conferences{% endblock%}
+{% block content %}
+<h1> Playing Krazy Words with video conference support</h1>
+
+
+
+  <p>words:
+  <ol>
+  {% for w in words %}
+    <li>{{w}}</li>
+    {% endfor %}
+    </ol>
+  </p>
+
+  <form method="POST">
+  <p>
+    created words:
+    <table>
+      {% for w in created_words %}
+      <tr>
+	<td>{{w}}</td>
+	<td>
+	  <select name="player-{{player}}-{{loop.index}}">
+	    {% for w in words %}
+	    <option value="{{loop.index}}">{{loop.index}}</option>
+	    {% endfor %}
+	  </select>
+	</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </p>
+    <input type="submit" value="submit my guess">
+  </form>
+
+{% endblock %}

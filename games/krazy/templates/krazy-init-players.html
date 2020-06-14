@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Krazy Words with video conferences{% endblock%}
+{% block content %}
+<h1> Playing Krazy Words with video conference support</h1>
+
+  <p>How to play: have everyone you want to play with connected via video or voice chat.</p>
+
+  <ul>
+  {% for n in players %}
+    <li> <a href="/krazy/{{seed}}/{{n}}">Player {{n}}</a>
+  {% endfor %}
+  </ul>
+  
+{% endblock %}

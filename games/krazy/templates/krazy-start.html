@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Krazy Words with video conferences{% endblock%}
+{% block content %}
+<h1> Playing Krazy Words with video conference support</h1>
+
+  <p>How to play: have everyone you want to play with connected via video or voice chat.</p>
+
+
+  <p>To start a new game, enter a unique word below</p>
+
+  <form method="POST">
+    session name: <input name="name">
+    <select name="language">
+      <option value="de">Deutsch</option>
+    </select>
+    <select name="players">
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+    </select>
+    <input type="submit" value="Start game">
+  </form>
+{% endblock %}
