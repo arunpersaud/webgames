@@ -120,10 +120,8 @@ def create_krazy_game():
     input_file = Path(f"games/krazy/resource/{language}.txt")
     with input_file.open() as f:
         data = json.load(f)
-        vowels = random.sample(data["vowels"] * 50, len(data["vowels"] * 50))
-        consonants = random.sample(
-            data["consonants"] * 50, len(data["consonants"] * 50)
-        )
+        vowels = random.sample(data["vowels"], len(data["vowels"]))
+        consonants = random.sample(data["consonants"], len(data["consonants"]))
         words = random.sample(data["words"], len(data["words"]))
 
     # create session file that stores the data for each player and a
