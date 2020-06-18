@@ -120,7 +120,7 @@ def create_krazy_game():
     input_file = Path(f"games/krazy/resource/{language}.txt")
     with input_file.open() as f:
         data = json.load(f)
-        vocals = random.sample(data["vocals"] * 50, len(data["vocals"] * 50))
+        vowels = random.sample(data["vowels"] * 50, len(data["vowels"] * 50))
         consonants = random.sample(
             data["consonants"] * 50, len(data["consonants"] * 50)
         )
@@ -131,7 +131,7 @@ def create_krazy_game():
     out = []
     for i in range(nr_players):
         tmp = {}
-        tmp["letters"] = vocals[3 * i : 3 * (i + 1)] + consonants[6 * i : 6 * (i + 1)]
+        tmp["letters"] = vowels[3 * i : 3 * (i + 1)] + consonants[6 * i : 6 * (i + 1)]
         out.append(tmp)
     if nr_players <= 5:
         out.append(words[:6])
