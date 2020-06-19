@@ -52,7 +52,7 @@ def load_player_data(seed: str, player: int):
 
     player_data = data[player]
     letters = player_data["letters"]
-    word = data[-1][player]
+    word = player_data["word"]
 
     return letters, word
 
@@ -130,11 +130,16 @@ def create_krazy_game():
     for i in range(nr_players):
         tmp = {}
         tmp["letters"] = vowels[3 * i : 3 * (i + 1)] + consonants[6 * i : 6 * (i + 1)]
+        tmp["word"] = words[i]
         out.append(tmp)
     if nr_players <= 5:
-        out.append(words[:6])
+        words = words[:6]
     else:
-        out.append(words[: nr_players + 1])
+        words = words[: nr_players + 1]
+
+    # shuffle again, since at the moment the words are ordered by player
+    words = random.sample(words, len(words))
+    out.append(words)
 
     with (tmpdir / f"{seed}.json").open("w") as f:
         json.dump(out, f)
