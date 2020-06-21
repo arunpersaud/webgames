@@ -168,7 +168,7 @@ def krazy_play(seed, player):
     # user hasn't created a word
     if not (tmpdir / f"{seed}-player{player}.txt").exists():
         return render_template(
-            "krazy-create_word.html", seed=seed, letters="-".join(letters), word=word
+            "krazy-create_word.html", seed=seed, letters=letters, word=word
         )
 
     # user already created their word

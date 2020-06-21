@@ -1,15 +1,32 @@
 {% extends "base.html" %}
 {% block title %}Krazy Words with video conferences{% endblock%}
+{% block css %}
+  <link rel="stylesheet" href="{{url_for('krazy.static', filename='krazy.css')}}?v=1.0">
+{% endblock %}
 {% block content %}
 <h1> Playing Krazy Words with video conference support</h1>
 
   <p>Your word is:  {{word}}.</p>
 
-  <p>Your letters are: {{letters}}  </p>
-
+<p>Your letters are:
+  <ul id="sortableList">
+    {% for l  in letters %}
+    <li>{{l}}</li>
+    {% endfor %}
+  </ul>
+</p>
+<p>(with javascript enabled, you can reorder the letter by drag&drop)</p>
   <form method="POST">
     Myguess: <input name="myword">
     <input type="submit" value="submit my word">
   </form>
 
+{% endblock %}
+
+{% block javascript %}
+<!-- Latest Sortable -->
+<script src="http://SortableJS.github.io/Sortable/Sortable.js"></script>
+<script>
+    Sortable.create(sortableList, { /* options */ });
+</script>
 {% endblock %}
