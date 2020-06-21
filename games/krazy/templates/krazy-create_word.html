@@ -8,13 +8,12 @@
 
   <p>Your word is:  {{word}}.</p>
 
-<p>Your letters are:
-  <ul id="sortableList">
-    {% for l  in letters %}
-    <li>{{l}}</li>
-    {% endfor %}
-  </ul>
-</p>
+<p>Your letters are:</p>
+<ul id="sortableList">
+  {% for l  in letters %}
+  <li>{{l}}</li>
+  {% endfor %}
+</ul>
 <p>(with javascript enabled, you can reorder the letter by drag&drop)</p>
   <form method="POST">
     Myguess: <input name="myword">
@@ -25,7 +24,7 @@
 
 {% block javascript %}
 <!-- Latest Sortable -->
-<script src="http://SortableJS.github.io/Sortable/Sortable.js"></script>
+<script src="{{url_for('krazy.static', filename='Sortable.js')}}?v=1.0"></script>
 <script>
     Sortable.create(sortableList, { /* options */ });
 </script>
