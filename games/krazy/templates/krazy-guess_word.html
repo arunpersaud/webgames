@@ -4,11 +4,16 @@
 <h1> Playing Krazy Words with video conference support</h1>
 
 
-
+  {% set ns = namespace(nr=-1) %}
   <p>words:
   <ol>
-  {% for w in words %}
+    {% for w in words %}
+    {% if w == myword %}
+    <li>*{{w}}*</li>
+    {% set ns.nr = loop.index %}
+    {% else %}
     <li>{{w}}</li>
+    {% endif %}
     {% endfor %}
     </ol>
   </p>
@@ -22,10 +27,16 @@
 	<td>{{w}}</td>
 	<td>
 	  <select name="player-{{player}}-{{loop.index}}">
+	    {% if loop.index == player+1 %}
+	    <option value="{{ns.nr}}">{{ns.nr}}</option>
+	    {% else %}
 	    {% for w in words %}
+	    {% if loop.index != ns.nr %}
 	    <option value="{{loop.index}}">{{loop.index}}</option>
+	    {% endif %}
 	    {% endfor %}
 	  </select>
+	  {% endif %}
 	</td>
       </tr>
       {% endfor %}

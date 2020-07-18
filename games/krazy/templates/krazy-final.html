@@ -3,7 +3,7 @@
 {% block content %}
 <h1> Playing Krazy Words with video conference support  -- Game number {{nr}}</h1>
 
-<h2> End of Round </h2>
+<h2> End of Round {{nr}}</h2>
 
 <table>
   <tr>
@@ -23,7 +23,7 @@
 
   <p>Please reload when all players made their guesses.</p>
 
-  <p>To start a new game with the same people, please use <a href="/krazy/{{seed}}/{{nr+1}}/{{player}}">this link</a>.</p>
-  <p>To start a new round, please visit the <a href="/krazy">starting page</a> again.</p>
+  <p>To start the next round, please use <a href="/krazy/{{seed}}/{{nr+1}}/{{player}}">this link</a>.</p>
+  <p>To start a completely new game, please visit the <a href="/krazy">starting page</a> again.</p>
 
 {% endblock %}

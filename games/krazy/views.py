@@ -34,9 +34,10 @@ def load_game_data(seed: str, nr: int):
     with datafile.open("r") as f:
         data = json.load(f)
 
-    words = data[-1]
-    nr_players = len(data) - 1
-    return words, nr_players
+    words = data["words"]
+    nr_players = len(data["player-info"])
+    language = data["language"]
+    return words, nr_players, language
 
 
 def load_player_data(seed: str, nr: int, player: int):
@@ -49,7 +50,7 @@ def load_player_data(seed: str, nr: int, player: int):
     with datafile.open("r") as f:
         data = json.load(f)
 
-    player_data = data[player]
+    player_data = data["player-info"][player]
     letters = player_data["letters"]
     word = player_data["word"]
 
@@ -76,38 +77,9 @@ def get_list_of_created_words(seed: str, nr: int):
     return created_words
 
 
-@krazy.route("/krazy")
-def krazy_start():
-    """The webage to start a game.
+def create_new_game(language, seed, nr, nr_players):
 
-    One user selects the langugae, the number of players, and a name
-    for the session.
-
-    """
-    return render_template("krazy-start.html")
-
-
-@krazy.route("/krazy", methods=["POST"])
-def create_krazy_game():
-    """Handle the request to start a game.
-
-    It creates a text file that stores the words for the round and the
-    distribution of letters for each user.
-
-    """
     tmpdir = make_tmpdir()
-
-    nr = 1
-
-    seed = ensure_alphanum(request.form["name"] + str(nr))
-    nr_players = int(request.form["players"])
-
-    random.seed(seed)
-
-    language = request.form["language"]
-    if language not in LANGUAGES:
-        flash(f"Language {language} not supported")
-        return redirect(f"/krazy")
 
     # clean up old round
     for i in range(MAX_PLAYERS):
@@ -127,34 +99,80 @@ def create_krazy_game():
 
     # create session file that stores the data for each player and a
     # list of all words in play
-    out = []
+    out = {}
+    player_info = []
     for i in range(nr_players):
         tmp = {}
         tmp["letters"] = vowels[3 * i : 3 * (i + 1)] + consonants[6 * i : 6 * (i + 1)]
         tmp["word"] = words[i]
-        out.append(tmp)
+        player_info.append(tmp)
+    out["player-info"] = player_info
     if nr_players <= 5:
         words = words[:6]
     else:
         words = words[: nr_players + 1]
-
     # shuffle again, since at the moment the words are ordered by player
     words = random.sample(words, len(words))
-    out.append(words)
+    out["words"] = words
+    out["language"] = language
 
     with (tmpdir / f"{seed}-{nr}.json").open("w") as f:
         json.dump(out, f)
 
+
+@krazy.route("/krazy")
+def krazy_start():
+    """The webage to start a game.
+
+    One user selects the langugae, the number of players, and a name
+    for the session.
+
+    """
+    return render_template("krazy-start.html")
+
+
+@krazy.route("/krazy", methods=["POST"])
+def create_krazy_game():
+    """Handle the request to start a game.
+
+    It creates a text file that stores the words for the round and the
+    distribution of letters for each user.
+
+    """
+
+    nr = 1
+
+    seed = ensure_alphanum(request.form["name"])
+    nr_players = int(request.form["players"])
+
+    combined_seed = seed + str(nr)
+    random.seed(combined_seed)
+
+    language = request.form["language"]
+    if language not in LANGUAGES:
+        flash(f"Language {language} not supported")
+        return redirect(f"/krazy")
+
+    create_new_game(language, seed, nr, nr_players)
+
     return render_template(
-        "krazy-init-players.html", seed=seed, nr=nr, players=list(range(nr_players))
+        "krazy-init-players.html",
+        seed=seed,
+        nr=nr,
+        players=list(range(nr_players)),
+        root=request.url_root,
     )
 
 
 @krazy.route("/krazy/<seed>/<nr>")
 def krazy_start_round(seed, nr):
-    words, nr_players = load_game_data(seed, int(nr))
+    words, nr_players, _ = load_game_data(seed, int(nr))
     return render_template(
-        "krazy-init-players.html", seed=seed, nr=nr, players=list(range(nr_players))
+        "krazy-init-players.html",
+        seed=seed,
+        nr=nr,
+        players=list(range(nr_players)),
+        root=request.url_root,
     )
 
 
@@ -170,9 +188,9 @@ def krazy_play(seed, nr, player):
 
     player = int(player)
     nr = int(nr)
-    seed = ensure_alphanum(f"{seed}-{nr}")
+    seed = ensure_alphanum(seed)
 
-    words, nr_players = load_game_data(seed, nr)
+    words, nr_players, _ = load_game_data(seed, nr)
     letters, word = load_player_data(seed, nr, player)
 
     # user hasn't created a word
@@ -187,6 +205,7 @@ def krazy_play(seed, nr, player):
     return render_template(
         "krazy-guess_word.html",
         seed=seed,
+        myword=word,
         words=words,
         created_words=created_words,
         player=player,
@@ -194,14 +213,15 @@ def krazy_play(seed, nr, player):
 
 
 @krazy.route("/krazy/<seed>/<nr>/<player>", methods=["POST"])
-def krazy_play_submit(seed, player):
+def krazy_play_submit(seed, nr, player):
     """Handle response from user play."""
     tmpdir = make_tmpdir()
 
     player = int(player)
-    seed = ensure_alphanum(seed + nr)
+    nr = int(nr)
+    seed = ensure_alphanum(seed)
 
-    words, nr_players = load_game_data(seed)
+    words, nr_players, _ = load_game_data(seed, nr)
 
     # handle if user created a word
     if "myword" in request.form:
@@ -232,7 +252,7 @@ def krazy_play_submit(seed, player):
                 tmp.append(str(g))
 
     if len(tmp) != nr_players:
-        flash("You need to assigne a guess for each word")
+        flash("You need to assign a guess for each word")
         return redirect(f"/krazy/{seed}/{nr}/{player}")
 
     if len(set(tmp)) != len(tmp):
@@ -251,11 +271,19 @@ def krazy_final(seed, nr, player):
     tmpdir = make_tmpdir()
 
     nr = int(nr)
+    player = int(player)
     seed = ensure_alphanum(seed)
-    words, nr_players = load_game_data(seed, nr)
+    words, nr_players, language = load_game_data(seed, nr)
+
+    # get ready for next round
+    tmpdir = make_tmpdir()
+    datafile = tmpdir / f"{seed}-{nr+1}.json"
+
+    if not datafile.exists():
+        create_new_game(language, seed, nr + 1, nr_players)
 
     created_words = get_list_of_created_words(seed, nr)
-    player = [f"{w} (player{i})" for i, w in enumerate(created_words)]
+    player_name = [f"{w} (player{i})" for i, w in enumerate(created_words)]
 
     guesses = []
     for i in range(nr_players):
@@ -266,7 +294,7 @@ def krazy_final(seed, nr, player):
                 guess_words = ["-"] * (len(words) + 1)
                 for j, g in enumerate(guess):
                     guess_words[g] = created_words[j]
-                guess_words[0] = player[i]
+                guess_words[0] = player_name[i]
                 guesses.append(guess_words)
 
     return render_template(
@@ -275,5 +303,6 @@ def krazy_final(seed, nr, player):
         nr=nr,
         words=words,
         player=player,
+        player_name=player_name,
         guesses=guesses,
     )

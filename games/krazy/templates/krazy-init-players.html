@@ -3,7 +3,8 @@
 {% block content %}
 <h1> Playing Krazy Words with video conference support</h1>
 
-  <p>How to play: have everyone you want to play with connected via video or voice chat and go to this url {{url_for('krazy.krazy_start_round', seed=seed, nr=nr)}}</p>
+  <p>How to play: have everyone you want to play with connected via video or voice chat and go to this url {{root}}{{url_for('krazy.krazy_start_round', seed=seed, nr=nr)}}.</p>
+  <p>Every player needs to pick a number and follow his/her link below:</p>
 
   <ul>
   {% for n in players %}
