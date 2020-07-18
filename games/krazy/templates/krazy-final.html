@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Krazy Words with video conferences{% endblock%}
 {% block content %}
-<h1> Playing Krazy Words with video conference support</h1>
+<h1> Playing Krazy Words with video conference support  -- Game number {{nr}}</h1>
 
 <h2> End of Round </h2>
 
@@ -23,8 +23,7 @@
 
   <p>Please reload when all players made their guesses.</p>
 
-  <p>To start a new round, please visit the <a href="/krazy">starting page</a> again. This
-  will reset the game, so only use the link once you are done with the
-  current round.</p>
+  <p>To start a new game with the same people, please use <a href="/krazy/{{seed}}/{{nr+1}}/{{player}}">this link</a>.</p>
+  <p>To start a new round, please visit the <a href="/krazy">starting page</a> again.</p>
 
 {% endblock %}

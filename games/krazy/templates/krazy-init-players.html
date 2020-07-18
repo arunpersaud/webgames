@@ -3,12 +3,12 @@
 {% block content %}
 <h1> Playing Krazy Words with video conference support</h1>
 
-  <p>How to play: have everyone you want to play with connected via video or voice chat.</p>
+  <p>How to play: have everyone you want to play with connected via video or voice chat and go to this url {{url_for('krazy.krazy_start_round', seed=seed, nr=nr)}}</p>
 
   <ul>
   {% for n in players %}
-    <li> <a href="/krazy/{{seed}}/{{n}}">Player {{n}}</a>
+    <li> <a href="/krazy/{{seed}}/{{nr}}/{{n}}">Player {{n}}</a>
   {% endfor %}
   </ul>
-  
+
 {% endblock %}
