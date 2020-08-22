@@ -1,5 +1,6 @@
 *~
 *pyc
+games/config.py
 tmp
 public
 __pycache__

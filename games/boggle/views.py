@@ -1,8 +1,9 @@
+from pathlib import Path
+import random
+import time
+
 from flask import Blueprint, render_template, request, redirect
 from ..util import nocache
-from pathlib import Path
-import time
-import random
 
 boggle = Blueprint(
     "boggle",
@@ -137,7 +138,7 @@ def create_boggle_game():
     if size == 4:
         generate_boggle_file(generate_4x4, "{}-4x4.txt".format(seed))
         return redirect("/boggle/4x4/{}".format(seed))
-    elif size == 5:
+    if size == 5:
         generate_boggle_file(generate_5x5, "{}-5x5.txt".format(seed))
         return redirect("/boggle/5x5/{}".format(seed))
 

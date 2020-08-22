@@ -1,9 +1,13 @@
-from flask import Blueprint, render_template, request, redirect
-from ..util import nocache
-from pathlib import Path
-import time
+"""
+Blueprint for playing Skat and Doppelkopf online.
+
+
+"""
+
 import random
-import datetime
+from pathlib import Path
+
+from flask import Blueprint, render_template, request, redirect, current_app
 
 doko_skat = Blueprint(
     "doko_skat",
@@ -13,8 +17,13 @@ doko_skat = Blueprint(
     static_url_path="/games/doko_skat/static",
 )
 
+
 def get_doko_cards(seed, nr, player):
-    random.seed(seed+str(nr))
+    """For a given seed and player, return a list of png files for the
+    cards.
+
+    """
+    random.seed(seed + str(nr) + current_app.config["SECRET_SEED"])
     cards = list(range(48))
     random.shuffle(cards)
     if player == "A":
@@ -31,8 +40,13 @@ def get_doko_cards(seed, nr, player):
     cards = ["doko/{}.png".format(c) for c in cards]
     return cards
 
+
 def get_skat_cards(seed, nr, player):
-    random.seed(seed+str(nr))
+    """For a given seed and player, return a list of png files for the
+    cards.
+
+    """
+    random.seed(seed + str(nr) + current_app.config["SECRET_SEED"])
     cards = list(range(32))
     random.shuffle(cards)
     if player == "A":
@@ -47,7 +61,8 @@ def get_skat_cards(seed, nr, player):
     cards = sorted(cards)
     cards = ["skat/{}.png".format(c) for c in cards]
     return cards
-        
+
+
 @doko_skat.route("/<game_type>")
 @doko_skat.route("/<game_type>", methods=["POST"])
 @doko_skat.route("/<game_type>/<seed>/<nr>/")
@@ -55,16 +70,16 @@ def get_skat_cards(seed, nr, player):
 def doko(game_type="doko", seed=None, player=None, nr=1):
     nr = int(nr)
 
-    SKAT = {'title': "Skat", 'link': 'skat'}
-    DOKO = {'title': "Doppelkopf", 'link': 'doko'}
+    SKAT = {"title": "Skat", "link": "skat"}
+    DOKO = {"title": "Doppelkopf", "link": "doko"}
 
     if game_type == "doko":
         game = DOKO
-        FILE = Path("tmp") / f"doko.db"
+        FILE = Path("tmp") / "doko.db"
     else:
-        FILE = Path("tmp") / f"skat.db"
+        FILE = Path("tmp") / "skat.db"
         game = SKAT
-    
+
     if player is not None:
         tag = f"{seed} {player} {nr}"
         if FILE.exists():
@@ -80,7 +95,9 @@ def doko(game_type="doko", seed=None, player=None, nr=1):
 
         with FILE.open("a") as f:
             f.write("{}\n".format(tag))
-        return render_template("doko-game.html", cards=cards, nr=nr, seed=seed, player=player, game=game)
+        return render_template(
+            "doko-game.html", cards=cards, nr=nr, seed=seed, player=player, game=game
+        )
 
     if request.method == "POST":
         seed = request.form["name"].lower()
@@ -94,9 +111,9 @@ def doko(game_type="doko", seed=None, player=None, nr=1):
 
     if seed is not None:
         if game_type == "doko":
-            players = {'A': False, 'B': False, 'C': False, 'D': False}
+            players = {"A": False, "B": False, "C": False, "D": False}
         else:
-            players = {'A': False, 'B': False, 'C': False, 'skat': False}
+            players = {"A": False, "B": False, "C": False, "skat": False}
         for player in players:
             tag = f"{seed} {player} {nr}"
             if FILE.exists():
@@ -104,7 +121,8 @@ def doko(game_type="doko", seed=None, player=None, nr=1):
                     for l in f:
                         if l.startswith(tag):
                             players[player] = True
-        return render_template("doko-start.html", seed=seed, nr=nr, players=players, game=game)
+        return render_template(
+            "doko-start.html", seed=seed, nr=nr, players=players, game=game
+        )
 
     return render_template("doko.html", game=game)
-

@@ -1,8 +1,17 @@
-from flask import Blueprint, render_template, request, redirect, abort, flash
-from ..util import ensure_alphanum
-from pathlib import Path
-import random
 import json
+import random
+from pathlib import Path
+
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    abort,
+    flash,
+    current_app,
+)
+from ..util import ensure_alphanum
 
 krazy = Blueprint(
     "krazy",
@@ -145,13 +154,13 @@ def create_krazy_game():
     seed = ensure_alphanum(request.form["name"])
     nr_players = int(request.form["players"])
 
-    combined_seed = seed + str(nr)
+    combined_seed = seed + str(nr) + current_app.config["SECRET_SEED"]
     random.seed(combined_seed)
 
     language = request.form["language"]
     if language not in LANGUAGES:
         flash(f"Language {language} not supported")
-        return redirect(f"/krazy")
+        return redirect("/krazy")
 
     create_new_game(language, seed, nr, nr_players)
 
