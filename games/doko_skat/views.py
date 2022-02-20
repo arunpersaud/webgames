@@ -19,6 +19,7 @@ doko_skat = Blueprint(
 
 
 def get_doko_cards(seed, nr, player):
+
     """For a given seed and player, return a list of png files for the
     cards.
 
