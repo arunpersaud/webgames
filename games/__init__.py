@@ -2,6 +2,7 @@ import sys
 import os
 
 from flask import Flask, render_template
+import secure
 
 # import the different games
 from .boggle.views import boggle
@@ -19,6 +20,13 @@ except ModuleNotFoundError:
 
 
 app = Flask(__name__)
+secure_headers = secure.Secure()
+
+
+@app.after_request
+def set_secure_headers(response):
+    secure_headers.framework.flask(response)
+    return response
 
 
 app.secret_key = os.urandom(12).hex()
