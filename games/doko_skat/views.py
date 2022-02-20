@@ -36,7 +36,7 @@ def shuffle_cards(seed: str, nr: int, number_of_cards: int) -> List[int]:
 
 def get_doko_cards(seed: str, nr: int, player: str) -> List[str]:
     """For a given seed and player, return the players list of cards as png files."""
-    cards = shuffle_cards(48)
+    cards = shuffle_cards(seed, nr, 48)
     # pick the card for the player
     if player == "A":
         cards = cards[:12]
@@ -56,7 +56,7 @@ def get_doko_cards(seed: str, nr: int, player: str) -> List[str]:
 
 def get_skat_cards(seed: str, nr: int, player: str) -> List[str]:
     """For a given seed and player, return the players list of cards as png files."""
-    cards = shuffle_cards(32)
+    cards = shuffle_cards(seed, nr, 32)
     if player == "A":
         cards = cards[:10]
     elif player == "B":
