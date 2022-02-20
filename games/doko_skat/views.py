@@ -6,7 +6,7 @@ Blueprint for playing Skat and Doppelkopf online.
 
 import random
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple, Dict
 
 from flask import Blueprint, render_template, request, redirect, current_app
 
@@ -70,82 +70,118 @@ def get_skat_cards(seed: str, nr: int, player: str) -> List[str]:
     cards = ["skat/{}.png".format(c) for c in cards]
     return cards
 
-
-@doko_skat.route("/<game_type>")
-@doko_skat.route("/<game_type>", methods=["POST"])
-@doko_skat.route("/<game_type>/<seed>/<nr>/")
-@doko_skat.route("/<game_type>/<seed>/<nr>/<player>")
-def doko(
-    game_type="doko",
-    seed: Optional[str] = None,
-    player: Optional[str] = None,
-    nr: int = 1,
-):
-    nr = int(nr)
-
+def select_game_type(game_type:str) -> Tuple[Path, Dict]:
+    """Return game specific settings."""
     if game_type == "doko":
-        STORAGE = Path("tmp") / "doko.db"
+        db = Path("tmp") / "doko.db"
         game = {"title": "Doppelkopf", "link": "doko"}
     else:
-        STORAGE = Path("tmp") / "skat.db"
+        db = Path("tmp") / "skat.db"
         game = {"title": "Skat", "link": "skat"}
+    return db, game
 
-    if player is not None:
-        # handle request from player to see cards
+def tag_exists(tag:str, db: Path)->bool:
+    """Check if tag is in databse.
 
-        # we write a tag into our database (just a text file) to see
-        # if the someone already requested the web page, if so we show
-        # an error, otherwise, we render the cards
-        tag = f"{seed} {player} {nr}"
-        # check if page has already been visited
-        if STORAGE.exists():
-            with STORAGE.open("r") as f:
-                for l in f:
-                    if l.startswith(tag):
-                        return render_template("doko-single-error.html", game=game)
+    Assumes a file based storage/db.
+    """
+    if db.exists():
+        with db.open("r") as f:
+            for l in f:
+                if l.startswith(tag):
+                    return True
+    return False
 
-        # get cards
-        if game_type == "doko":
-            cards = get_doko_cards(seed, nr, player)
-        else:
-            cards = get_skat_cards(seed, nr, player)
-
-        # register page as visited
-        with STORAGE.open("a") as f:
+def add_tag(tag:str, db:Path)->None:
+    """Add a tag to the database."""
+    if db.exists():
+        with db.open("a") as f:
             f.write("{}\n".format(tag))
-        return render_template(
-            "doko-game.html", cards=cards, nr=nr, seed=seed, player=player, game=game
-        )
 
-    if request.method == "POST":
-        # someone entered a new seesion name, do some error checking
-        # on the seed and redirect to the first game
-        seed = request.form["name"].lower()
-        seed = seed.replace(" ", "")
-        out = ""
-        for s in seed:
-            if s.isalnum():
-                out += s
-        seed = out
-        return redirect(f"/{game_type}/{seed}/{nr}")
 
-    if seed is not None:
-        # show a page for the current game to see how already looked
-        # at their hand and who hasn't
-        if game_type == "doko":
-            players = {"A": False, "B": False, "C": False, "D": False}
-        else:
-            players = {"A": False, "B": False, "C": False, "skat": False}
-        for player in players:
-            tag = f"{seed} {player} {nr}"
-            if STORAGE.exists():
-                with STORAGE.open("r") as f:
-                    for l in f:
-                        if l.startswith(tag):
-                            players[player] = True
-        return render_template(
-            "doko-start.html", seed=seed, nr=nr, players=players, game=game
-        )
+@doko_skat.route("/<game_type>")
+def doko(game_type="doko"):
+    """Page to start a new game."""
 
-    # none of the above, show form to create a new session.
+    _, game = select_game_type(game_type)
+
     return render_template("doko.html", game=game)
+
+
+@doko_skat.route("/<game_type>/<seed>/<nr>/")
+def display_game(
+    game_type="doko",
+    seed: str = None,
+    nr: int = 1,
+):
+    """Game overview page.
+
+    Show a page for the current game to see how already looked
+    at their hand and who hasn't
+    """
+    nr = int(nr)
+
+    STORAGE, game = select_game_type(game_type)
+
+    if game_type == "doko":
+        players = {"A": False, "B": False, "C": False, "D": False}
+    else:
+        players = {"A": False, "B": False, "C": False, "skat": False}
+    for player in players:
+        tag = f"{seed} {player} {nr}"
+        if tag_exists(tag, STORAGE):
+            players[player] = True
+    return render_template(
+        "doko-start.html", seed=seed, nr=nr, players=players, game=game
+    )
+
+@doko_skat.route("/<game_type>", methods=["POST"])
+def start_game(
+    game_type="doko",
+):
+    """Someone entered a new seesion name.
+
+    Do some error checking on the seed and redirect to the first game
+    """
+    seed = request.form["name"].lower()
+    seed = seed.replace(" ", "")
+    out = ""
+    for s in seed:
+        if s.isalnum():
+            out += s
+    seed = out
+    return redirect(f"/{game_type}/{seed}/1")
+
+@doko_skat.route("/<game_type>/<seed>/<nr>/<player>")
+def display_cards(
+    game_type="doko",
+    seed: str = None,
+    player: str = None,
+    nr: int = 1,
+):
+    """Handle request from player to see cards.
+
+    We write a tag into our database (just a text file) to see
+    if the someone already requested the web page, if so we show
+    an error, otherwise, we render the cards
+    """
+    nr = int(nr)
+
+    STORAGE, game = select_game_type(game_type)
+
+    tag = f"{seed} {player} {nr}"
+    if tag_exists(tag, STORAGE):
+        return render_template("doko-single-error.html", game=game)
+
+    if game_type == "doko":
+        cards = get_doko_cards(seed, nr, player)
+    else:
+        cards = get_skat_cards(seed, nr, player)
+
+    # register page as visited
+    add_tag(tag, STORAGE)
+
+    return render_template(
+        "doko-game.html", cards=cards, nr=nr, seed=seed, player=player, game=game
+    )
+
