@@ -3,6 +3,7 @@ import os
 
 from flask import Flask, render_template
 
+# import the different games
 from .boggle.views import boggle
 from .doko_skat.views import doko_skat
 from .krazy.views import krazy
@@ -27,6 +28,7 @@ if app.config["ENV"] == "development":
 else:
     app.config.from_object(ProductionConfig())
 
+# register the different games
 app.register_blueprint(boggle)
 app.register_blueprint(krazy)
 app.register_blueprint(doko_skat)
