@@ -70,6 +70,25 @@ def get_skat_cards(seed: str, nr: int, player: str) -> List[str]:
     cards = ["skat/{}.png".format(c) for c in cards]
     return cards
 
+
+def doko_sort_cards_by_suit(cards: List[str]) -> Tuple[List[str]]:
+    clubs = [3, 11, 27, 29, 31, 33]
+    spades = [5, 13, 35, 37, 39, 41]
+    hearts = [1, 7, 15, 43, 45, 47]
+    diamonds = [9, 17, 19, 21, 23, 25]
+
+    clubs = ["doko/{}.png".format(n) for n in clubs]
+    spades = ["doko/{}.png".format(n) for n in spades]
+    hearts = ["doko/{}.png".format(n) for n in hearts]
+    diamonds = ["doko/{}.png".format(n) for n in diamonds]
+
+    my_clubs = [c for c in cards if c in clubs]
+    my_spades = [c for c in cards if c in spades]
+    my_hearts = [c for c in cards if c in hearts]
+    my_diamonds = [c for c in cards if c in diamonds]
+
+    return my_clubs, my_spades, my_hearts, my_diamonds
+
 def select_game_type(game_type:str) -> Tuple[Path, Dict]:
     """Return game specific settings."""
     if game_type == "doko":
@@ -178,10 +197,11 @@ def display_cards(
     else:
         cards = get_skat_cards(seed, nr, player)
 
+    suit = doko_sort_cards_by_suit(cards)
     # register page as visited
     add_tag(tag, STORAGE)
 
     return render_template(
-        "doko-game.html", cards=cards, nr=nr, seed=seed, player=player, game=game
+        "doko-game.html", cards=cards, suit=suit, nr=nr, seed=seed, player=player, game=game
     )
 

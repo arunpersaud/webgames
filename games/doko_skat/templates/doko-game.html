@@ -6,15 +6,24 @@
 {% block content %}
   <h1>{{game.title}}</h1>
 
-  <h3>Next game</h3>
-  Click <a href="/{{game.link}}/{{seed}}/{{nr+1}}/{{player}}">here</a> to see your next hand.
-  (Only click this once you finished the current game, since you will not be able to reload this page).
+  <h3>This is game number {{nr}} for player {{player}} in session '{{seed}}'.</h3>
 
-  <h3>Game number {{nr}} in '{{seed}}'</h3>
+  <p>Once you are finished with this game (and only then, since you will not be able to go back to this page):
+  <a href="/{{game.link}}/{{seed}}/{{nr+1}}/{{player}}"><button class="success">Next game</button></a></p>
+
 
   <p> Player {{player}}'s cards are: </p>
   {% for c in cards %}
     <img class="card" src="{{url_for('doko_skat.static', filename=c)}}"></img>
+  {% endfor %}
+
+  <p>To make it easier to select these from your deck, here are your cards sorted by suit:</p>
+    {% for s in suit %}
+    <div>
+      {% for c in s %}
+      <img class="card" src="{{url_for('doko_skat.static', filename=c)}}"></img>
+      {% endfor %}
+    </div>
   {% endfor %}
 
   {% if game.link == "doko" %}
