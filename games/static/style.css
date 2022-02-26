@@ -2,6 +2,11 @@ html, body {
     width: 100%;
 }
 
+div.nav {
+    overflow: hidden;
+    height: 50px;
+}
+
 .flashes {
   padding: 20px;
   background-color: #f44336; /* Red */

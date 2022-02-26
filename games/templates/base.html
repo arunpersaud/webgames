@@ -15,7 +15,7 @@
 </head>
 
 <body>
-{% with messages = get_flashed_messages() %}
+  {% with messages = get_flashed_messages() %}
   {% if messages %}
      <div class="flashes">
       <ul>
@@ -27,8 +27,8 @@
       </div>
     {% endif %}
   {% endwith %}
-  <div style="overflow: hidden;height: 50px;">
-    <nav>
+  <div class="nav">
+     <nav>
       <a href="/" class="brand">
         <span>Video chat games</span>
       </a>
@@ -41,7 +41,6 @@
       </div>
     </nav>
   </div>
-
   <div class="flex three">
     <div class="sixth"></div>
     <div class="two-third">
