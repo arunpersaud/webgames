@@ -5,15 +5,17 @@
   <meta charset="utf-8">
 
   <title>{% block title %}Games with video conferences{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="A list of games you can play using a video conference">
   <meta name="author" content="Arun Persaud">
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
   <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}?v=1.0">
   {% block css %}{% endblock %}
 </head>
 
 <body>
-  {% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages() %}
   {% if messages %}
      <div class="flashes">
       <ul>
@@ -25,27 +27,57 @@
       </div>
     {% endif %}
   {% endwith %}
+  <div style="overflow: hidden;height: 50px;">
+    <nav>
+      <a href="/" class="brand">
+        <span>Video chat games</span>
+      </a>
 
-  {% block content %}
-  <h1> List of Games for pure videoconferences </h1>
-  <ul>
-    <li>Boggle</li>
-    <li>Stadt, Land, Fluss</li>
-  </ul>
-  <h1> List of Games with web page support</h1>
-  <ul>
-    <li><a href="/boggle">Boggle (4x4, 5x5)</a></li>
-    <li><a href="/krazy">Krazy Words</a></li>
-    <li><a href="/doko">Doko</a></li>
-    <li><a href="/skat">Skat</a></li>
-  </ul>
+      <div class="menu">
+        <a href="/doko" class="pseudo button icon-picture">Doko</a>
+        <a href="/skat" class="pseudo button icon-picture">Skat</a>
+        <a href="/boggle" class="pseudo button icon-picture">Boogle</a>
+        <a href="/krazy" class="pseudo button icon-picture">Krazy</a>
+      </div>
+    </nav>
+  </div>
 
-  <h1> List of online games by other people</h1>
-  <ul>
-    <li><a href="https://www.horsepaste.com/examinations">Codenames</a></li>
-  </ul>
+  <div class="flex three">
+    <div class="sixth"></div>
+    <div class="two-third">
+      {% block content %}
+       <h1> Games to play using video chats </h1>
 
-  {% endblock %}
+       <p>Here are some ideas for games you can easily play via video chat, without any help.</p>
+
+       <ul>
+         <li>Boggle</li>
+         <li>Stadt, Land, Fluss</li>
+       </ul>
+
+       <p>For some card games or other games you need a way to share some
+       information (e.g. who gets which cards) and for this reason we made
+       this webpage. Currently, you can play several gams here.</p>
+
+       <ul>
+         <li><a href="/doko">Doko</a></li>
+         <li><a href="/skat">Skat</a></li>
+         <li><a href="/boggle">Boggle (4x4, 5x5)</a></li>
+         <li><a href="/krazy">Krazy Words</a></li>
+       </ul>
+
+       <p>To start a new game, just click on the link in the navigation bar
+       on the top right.</p>
+
+       <p>We also like the following web pages other people made:</p>
+
+       <ul>
+         <li><a href="https://www.horsepaste.com/examinations">Codenames</a></li>
+       </ul>
+       {% endblock %}
+    </div>
+    <div class="sixth"></div>
+  </div>
   <footer>
     Copyright 2020-2022 Arun Persaud, Sean Brennan. Code available on <a href="https://github.com/arunpersaud/webgames">github</a>.
 
