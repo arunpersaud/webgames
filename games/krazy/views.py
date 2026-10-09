@@ -131,9 +131,9 @@ def create_new_game(language, seed, nr, nr_players):
 
 @krazy.route("/krazy")
 def krazy_start():
-    """The webage to start a game.
+    """The webpage to start a game.
 
-    One user selects the langugae, the number of players, and a name
+    One user selects the language, the number of players, and a name
     for the session.
 
     """
@@ -267,7 +267,7 @@ def krazy_play_submit(seed, nr, player):
         return redirect(f"/krazy/{seed}/{nr}/{player}")
 
     if len(set(tmp)) != len(tmp):
-        flash("You can use the same number twice")
+        flash("You cannot use the same number twice")
         return redirect(f"/krazy/{seed}/{nr}/{player}")
 
     with (tmpdir / f"{seed}-{nr}-player{player}-guess.txt").open("w") as f:

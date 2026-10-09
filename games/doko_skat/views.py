@@ -48,7 +48,7 @@ def get_doko_cards(seed: str, nr: int, player: str) -> List[str]:
         cards = cards[36:]
     # normalize to just the odd numbers, since we don't have duplicate png files
     cards = [2 * (c // 2) + 1 for c in cards]
-    # the png files are sorted in the corrrect way, e.g. 0 is the ten of hearts, etc.
+    # the png files are sorted in the correct way, e.g. 0 is the ten of hearts, etc.
     cards = sorted(cards)
     cards = ["doko/{}.png".format(c) for c in cards]
     return cards
@@ -65,7 +65,7 @@ def get_skat_cards(seed: str, nr: int, player: str) -> List[str]:
         cards = cards[20:30]
     elif player == "skat":
         cards = cards[30:]
-    # the png files are sorted in the corrrect way, e.g. 0 is the ten of hearts, etc.
+    # the png files are sorted in the correct way, e.g. 0 is the ten of hearts, etc.
     cards = sorted(cards)
     cards = ["skat/{}.png".format(c) for c in cards]
     return cards
@@ -100,7 +100,7 @@ def select_game_type(game_type:str) -> Tuple[Path, Dict]:
     return db, game
 
 def tag_exists(tag:str, db: Path)->bool:
-    """Check if tag is in databse.
+    """Check if tag is in database.
 
     Assumes a file based storage/db.
     """
@@ -135,7 +135,7 @@ def display_game(
 ):
     """Game overview page.
 
-    Show a page for the current game to see how already looked
+    Show a page for the current game to see who already looked
     at their hand and who hasn't
     """
     nr = int(nr)
@@ -158,7 +158,7 @@ def display_game(
 def start_game(
     game_type="doko",
 ):
-    """Someone entered a new seesion name.
+    """Someone entered a new session name.
 
     Do some error checking on the seed and redirect to the first game
     """
