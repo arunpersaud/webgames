@@ -7,9 +7,18 @@ Blueprint for playing Skat and Doppelkopf online.
 import random
 from pathlib import Path
 
-from flask import Blueprint, abort, current_app, redirect, render_template, request
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
-from ..util import data_dir
+from ..util import data_dir, ensure_alphanum
 
 doko_skat = Blueprint(
     "doko_skat",
@@ -122,7 +131,7 @@ def add_tag(tag: str, db: Path) -> None:
             f.write(f"{tag}\n")
 
 
-@doko_skat.route("/<game_type>")
+@doko_skat.route("/<any(doko, skat):game_type>")
 def doko(game_type="doko"):
     """Page to start a new game."""
 
@@ -131,7 +140,7 @@ def doko(game_type="doko"):
     return render_template("doko.html", game=game)
 
 
-@doko_skat.route("/<game_type>/<seed>/<nr>/")
+@doko_skat.route("/<any(doko, skat):game_type>/<name:seed>/<int:nr>/")
 def display_game(
     game_type="doko",
     seed: str = None,
@@ -142,8 +151,6 @@ def display_game(
     Show a page for the current game to see who already looked
     at their hand and who hasn't
     """
-    nr = int(nr)
-
     STORAGE, game = select_game_type(game_type)
 
     if game_type == "doko":
@@ -159,7 +166,7 @@ def display_game(
     )
 
 
-@doko_skat.route("/<game_type>", methods=["POST"])
+@doko_skat.route("/<any(doko, skat):game_type>", methods=["POST"])
 def start_game(
     game_type="doko",
 ):
@@ -167,17 +174,16 @@ def start_game(
 
     Do some error checking on the seed and redirect to the first game
     """
-    seed = request.form["name"].lower()
-    seed = seed.replace(" ", "")
-    out = ""
-    for s in seed:
-        if s.isalnum():
-            out += s
-    seed = out
-    return redirect(f"/{game_type}/{seed}/1")
+    seed = ensure_alphanum(request.form.get("name", ""))
+    if not seed:
+        flash("Please enter a session name")
+        return redirect(url_for("doko_skat.doko", game_type=game_type))
+    return redirect(
+        url_for("doko_skat.display_game", game_type=game_type, seed=seed, nr=1)
+    )
 
 
-@doko_skat.route("/<game_type>/<seed>/<nr>/<player>")
+@doko_skat.route("/<any(doko, skat):game_type>/<name:seed>/<int:nr>/<player>")
 def display_cards(
     game_type="doko",
     seed: str = None,
@@ -190,13 +196,10 @@ def display_cards(
     if the someone already requested the web page, if so we show
     an error, otherwise, we render the cards
     """
-    nr = int(nr)
-
-    # tags are lines in a text file: no spaces/newlines from the URL
     valid_players = (
         ("A", "B", "C", "D") if game_type == "doko" else ("A", "B", "C", "skat")
     )
-    if not seed.isalnum() or player not in valid_players:
+    if player not in valid_players:
         abort(404)
 
     STORAGE, game = select_game_type(game_type)

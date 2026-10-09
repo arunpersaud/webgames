@@ -16,6 +16,7 @@ from flask import Flask, render_template
 from .boggle.views import boggle
 from .doko_skat.views import doko_skat
 from .krazy.views import krazy
+from .util import SessionNameConverter
 
 # no CSP yet: boggle loads jquery from a CDN, krazy uses an inline script
 secure_headers = secure.Secure(
@@ -37,6 +38,8 @@ def create_app(test_config: dict | None = None) -> Flask:
             if not (app.debug or app.testing):
                 raise RuntimeError(f"FLASK_{key} is not set")
             app.config[key] = f"insecure-dev-{key.lower()}"
+
+    app.url_map.converters["name"] = SessionNameConverter
 
     @app.after_request
     def set_secure_headers(response):

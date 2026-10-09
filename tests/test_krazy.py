@@ -24,8 +24,32 @@ def test_player_limit(client, players):
     assert start(client, players).status_code == 400
 
 
-def test_unknown_game(client):
-    assert client.get("/krazy/nothere/1/0").status_code == 404
+@pytest.mark.parametrize(
+    "url", ["/krazy/nothere/1/0", "/krazy/krazy1/1/3", "/krazy/krazy1/x/0"]
+)
+def test_invalid_urls(client, url):
+    start(client)
+    assert client.get(url).status_code == 404
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"name": "k", "players": "x", "language": "de"},
+        {"name": "k", "players": 3, "language": "xx"},
+        {"name": "k", "language": "de"},
+    ],
+)
+def test_invalid_start_form(client, data):
+    assert client.post("/krazy", data=data).status_code == 400
+
+
+def test_out_of_range_guess(client):
+    start(client)
+    client.post("/krazy/krazy1/1/0", data={"myword": ""})
+    data = {"player-0-1": 1, "player-0-2": 2, "player-0-3": 99}
+    response = client.post("/krazy/krazy1/1/0", data=data, follow_redirects=True)
+    assert "assign a guess for each word" in response.get_data(as_text=True)
 
 
 def test_full_round(client):

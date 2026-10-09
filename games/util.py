@@ -4,6 +4,7 @@ from pathlib import Path
 
 from flask import current_app, make_response
 from werkzeug.http import http_date
+from werkzeug.routing import BaseConverter
 
 
 def nocache(view):
@@ -21,14 +22,15 @@ def nocache(view):
     return update_wrapper(no_cache, view)
 
 
-def ensure_alphanum(input: str):
-    input = input.lower()
-    input = input.replace(" ", "")
-    out = ""
-    for s in input:
-        if s.isalnum():
-            out += s
-    return out
+def ensure_alphanum(text: str) -> str:
+    """Lowercase letters and digits of text; used for session names and words."""
+    return "".join(c for c in text.lower() if c.isalnum())
+
+
+class SessionNameConverter(BaseConverter):
+    """URL part <name:seed>: a session name made by ensure_alphanum()."""
+
+    regex = r"[^\W_]+"
 
 
 def data_dir() -> Path:

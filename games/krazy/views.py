@@ -10,6 +10,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    url_for,
 )
 
 from ..util import data_dir, ensure_alphanum
@@ -54,6 +55,8 @@ def load_player_data(seed: str, nr: int, player: int):
     with datafile.open("r") as f:
         data = json.load(f)
 
+    if not 0 <= player < len(data["player-info"]):
+        abort(404)
     player_data = data["player-info"][player]
     letters = player_data["letters"]
     word = player_data["word"]
@@ -144,15 +147,16 @@ def create_krazy_game():
 
     nr = 1
 
-    seed = ensure_alphanum(request.form["name"])
-    nr_players = int(request.form["players"])
-    if not 1 <= nr_players <= MAX_PLAYERS:
+    seed = ensure_alphanum(request.form.get("name", ""))
+    nr_players = request.form.get("players", type=int)
+    language = request.form.get("language")
+    if nr_players is None or not 1 <= nr_players <= MAX_PLAYERS:
         abort(400)
-
-    language = request.form["language"]
     if language not in LANGUAGES:
-        flash(f"Language {language} not supported")
-        return redirect("/krazy")
+        abort(400)
+    if not seed:
+        flash("Please enter a session name")
+        return redirect(url_for("krazy.krazy_start"))
 
     create_new_game(language, seed, nr, nr_players)
 
@@ -165,9 +169,9 @@ def create_krazy_game():
     )
 
 
-@krazy.route("/krazy/<seed>/<nr>")
+@krazy.route("/krazy/<name:seed>/<int:nr>")
 def krazy_start_round(seed, nr):
-    words, nr_players, _ = load_game_data(seed, int(nr))
+    words, nr_players, _ = load_game_data(seed, nr)
     return render_template(
         "krazy-init-players.html",
         seed=seed,
@@ -177,7 +181,7 @@ def krazy_start_round(seed, nr):
     )
 
 
-@krazy.route("/krazy/<seed>/<nr>/<player>")
+@krazy.route("/krazy/<name:seed>/<int:nr>/<int:player>")
 def krazy_play(seed, nr, player):
     """Handle the play for a single player
 
@@ -186,10 +190,6 @@ def krazy_play(seed, nr, player):
 
     """
     tmpdir = data_dir()
-
-    player = int(player)
-    nr = int(nr)
-    seed = ensure_alphanum(seed)
 
     words, nr_players, _ = load_game_data(seed, nr)
     letters, word = load_player_data(seed, nr, player)
@@ -213,14 +213,10 @@ def krazy_play(seed, nr, player):
     )
 
 
-@krazy.route("/krazy/<seed>/<nr>/<player>", methods=["POST"])
+@krazy.route("/krazy/<name:seed>/<int:nr>/<int:player>", methods=["POST"])
 def krazy_play_submit(seed, nr, player):
     """Handle response from user play."""
     tmpdir = data_dir()
-
-    player = int(player)
-    nr = int(nr)
-    seed = ensure_alphanum(seed)
 
     words, nr_players, _ = load_game_data(seed, nr)
 
@@ -238,45 +234,42 @@ def krazy_play_submit(seed, nr, player):
                     f"Letter -{letter}- not in your list of letters"
                     " (or not often enough)"
                 )
-                return redirect(f"/krazy/{seed}/{nr}/{player}")
+                return redirect(
+                    url_for("krazy.krazy_play", seed=seed, nr=nr, player=player)
+                )
 
         with (tmpdir / f"{seed}-{nr}-player{player}.txt").open("w") as f:
             f.write(myword)
 
-        return redirect(f"/krazy/{seed}/{nr}/{player}")
+        return redirect(url_for("krazy.krazy_play", seed=seed, nr=nr, player=player))
 
-    # handle user guess
+    # handle user guess: for each created word, the number of the word it fits
     tmp = []
-    for i in range(nr_players):
-        for j in range(len(words)):
-            if f"player-{i}-{j}" in request.form:
-                # convert to int for user validation
-                g = int(request.form[f"player-{i}-{j}"])
-                # we do need strings for writing to file later
-                tmp.append(str(g))
+    for i in range(1, nr_players + 1):
+        g = request.form.get(f"player-{player}-{i}", type=int)
+        if g is not None and 1 <= g <= len(words):
+            # we do need strings for writing to file later
+            tmp.append(str(g))
 
     if len(tmp) != nr_players:
         flash("You need to assign a guess for each word")
-        return redirect(f"/krazy/{seed}/{nr}/{player}")
+        return redirect(url_for("krazy.krazy_play", seed=seed, nr=nr, player=player))
 
     if len(set(tmp)) != len(tmp):
         flash("You cannot use the same number twice")
-        return redirect(f"/krazy/{seed}/{nr}/{player}")
+        return redirect(url_for("krazy.krazy_play", seed=seed, nr=nr, player=player))
 
     with (tmpdir / f"{seed}-{nr}-player{player}-guess.txt").open("w") as f:
         f.write(",".join(tmp))
 
-    return redirect(f"/krazy/{seed}/{nr}/{player}/final")
+    return redirect(url_for("krazy.krazy_final", seed=seed, nr=nr, player=player))
 
 
-@krazy.route("/krazy/<seed>/<nr>/<player>/final")
+@krazy.route("/krazy/<name:seed>/<int:nr>/<int:player>/final")
 def krazy_final(seed, nr, player):
     """Show all guesses from all players."""
     tmpdir = data_dir()
 
-    nr = int(nr)
-    player = int(player)
-    seed = ensure_alphanum(seed)
     words, nr_players, language = load_game_data(seed, nr)
 
     # get ready for next round

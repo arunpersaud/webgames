@@ -15,7 +15,7 @@ def hand(client, game, seed, nr, player):
 def test_start_session_sanitizes_name(client):
     response = client.post("/doko", data={"name": "My Game!"})
     assert response.status_code == 302
-    assert response.headers["Location"] == "/doko/mygame/1"
+    assert response.headers["Location"] == "/doko/mygame/1/"
 
 
 def test_doko_deal(client):
@@ -59,7 +59,11 @@ def test_deal_is_deterministic(client, tmp_path):
         "/doko/s1/1/E",
         "/skat/s1/1/D",
         "/doko/s%0A1/1/A",
-        pytest.param("/doko/s1/x/A", marks=pytest.mark.xfail(strict=True)),
+        "/doko/s1/x/A",
+        "/doko/s1/-1/A",
+        "/doko/s_1/1/A",
+        "/poker",
+        "/favicon.ico",
     ],
 )
 def test_invalid_urls(client, url):
@@ -72,3 +76,9 @@ def test_deal_does_not_touch_global_random(client):
     state = random.getstate()
     hand(client, "doko", "s1", 1, "A")
     assert random.getstate() == state
+
+
+def test_empty_session_name(client):
+    response = client.post("/skat", data={"name": "!?"}, follow_redirects=True)
+    assert response.request.path == "/skat"
+    assert "Please enter a session name" in response.get_data(as_text=True)

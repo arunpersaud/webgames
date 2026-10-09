@@ -1,9 +1,9 @@
 import random
 import time
 
-from flask import Blueprint, abort, redirect, render_template, request
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
-from ..util import data_dir, nocache
+from ..util import data_dir, ensure_alphanum, nocache
 
 boggle = Blueprint(
     "boggle",
@@ -14,7 +14,6 @@ boggle = Blueprint(
 )
 
 BOGGLE_TIME = 5 * 60
-SIZES = ("4x4", "5x5")
 
 
 def generate_4x4():
@@ -103,11 +102,9 @@ def load_boggle(filename):
     return boggle_text, t
 
 
-@boggle.route("/boggle/<size>/<seed>/start")
+@boggle.route("/boggle/<any(4x4, 5x5):size>/<name:seed>/start")
 @nocache
 def start_boggle(size, seed):
-    if size not in SIZES:
-        abort(404)
     if size == "4x4":
         generate_boggle_file(generate_4x4, f"{seed}-{size}.txt")
     else:
@@ -115,11 +112,9 @@ def start_boggle(size, seed):
     return "{started: 1}"
 
 
-@boggle.route("/boggle/<size>/<seed>/update")
+@boggle.route("/boggle/<any(4x4, 5x5):size>/<name:seed>/update")
 @nocache
 def create_boggle(size, seed):
-    if size not in SIZES:
-        abort(404)
     FILE = data_dir() / f"{seed}-{size}.txt"
     if not FILE.exists():
         return "{-2}"
@@ -130,33 +125,25 @@ def create_boggle(size, seed):
 
 @boggle.route("/boggle", methods=["POST"])
 def create_boggle_game():
-    seed = request.form["name"].lower()
-    seed = seed.replace(" ", "")
-    out = ""
-    for s in seed:
-        if s.isalnum():
-            out += s
-    seed = out
-
-    size = int(request.form["size"])
-    if not seed or size not in (4, 5):
+    seed = ensure_alphanum(request.form.get("name", ""))
+    size = request.form.get("size", type=int)
+    if size not in (4, 5):
         abort(400)
+    if not seed:
+        flash("Please enter a name for the game")
+        return redirect(url_for("boggle.boggle_4x4"))
 
-    if size == 4:
-        generate_boggle_file(generate_4x4, f"{seed}-4x4.txt")
-        return redirect(f"/boggle/4x4/{seed}")
-    if size == 5:
-        generate_boggle_file(generate_5x5, f"{seed}-5x5.txt")
-        return redirect(f"/boggle/5x5/{seed}")
+    size = f"{size}x{size}"
+    generator = generate_4x4 if size == "4x4" else generate_5x5
+    generate_boggle_file(generator, f"{seed}-{size}.txt")
+    return redirect(url_for("boggle.boggle_4x4", size=size, seed=seed))
 
 
-@boggle.route("/boggle/<size>/<seed>")
+@boggle.route("/boggle/<any(4x4, 5x5):size>/<name:seed>")
 @boggle.route("/boggle")
 def boggle_4x4(seed=None, size="4x4"):
 
     if seed is not None:
-        if size not in SIZES:
-            abort(404)
         s = 4 if size == "4x4" else 5
 
         boggle_text, t = load_boggle(f"{seed}-{size}.txt")

@@ -39,6 +39,11 @@ def test_invalid_size(client, url):
     assert client.get(url).status_code == 404
 
 
-@pytest.mark.parametrize("data", [{"name": "g", "size": 6}, {"name": "!", "size": 4}])
+@pytest.mark.parametrize("data", [{"name": "g", "size": 6}, {"name": "g"}])
 def test_invalid_form(client, data):
     assert client.post("/boggle", data=data).status_code == 400
+
+
+def test_empty_name(client):
+    response = client.post("/boggle", data={"name": "!", "size": 4})
+    assert response.headers["Location"] == "/boggle"
