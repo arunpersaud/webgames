@@ -2,7 +2,9 @@
 """
 Create letter tiles for use with web games.
 
-Geneates boggle like letters, with qu highlighted.
+Generates boggle like letters, with qu highlighted. Needs ImageMagick;
+writes tile_*.png into the current directory, so run it from
+games/boggle/static/images.
 """
 
 import os

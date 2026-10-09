@@ -61,3 +61,12 @@ def test_no_inline_code(template):
 def test_no_external_resources(template):
     html = template.read_text()
     assert not re.search(r'<(script|link|img)[^>]+(src|href)="(https?:)?//', html)
+
+
+def test_only_web_assets_in_static():
+    """Everything under static/ is public; keep scripts and notes elsewhere."""
+    root = Path(__file__).parent.parent / "games"
+    allowed = {".css", ".js", ".png", ".svg", ".ico"}
+    for path in root.glob("**/static/**/*"):
+        if path.is_file():
+            assert path.suffix in allowed, path

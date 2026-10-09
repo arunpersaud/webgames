@@ -44,3 +44,9 @@ port 8000, dependencies from `uv.lock`):
 
 Game state is kept in `/data/webgames.sqlite`; games untouched for a week
 are deleted.
+
+## Credits
+
+The Doppelkopf card images are generated with inkscape from the SVG cards
+at [svg-cards.sourceforge.net](http://svg-cards.sourceforge.net/), released
+under the GNU Lesser General Public License.
