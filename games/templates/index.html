@@ -1,1 +1,28 @@
 {% extends "base.html" %}
+{% block content %}
+  <h1>Games to play using video chats</h1>
+
+  <p>Here are some ideas for games you can easily play via video chat, without any help.</p>
+  <ul>
+    <li>Boggle</li>
+    <li>Stadt, Land, Fluss</li>
+  </ul>
+
+  <p>For some card games or other games you need a way to share some
+    information (e.g. who gets which cards) and for this reason we made
+    this webpage. Currently, you can play several games here.</p>
+  <ul>
+    <li><a href="{{ url_for('doko_skat.doko', game_type='doko') }}">Doko</a></li>
+    <li><a href="{{ url_for('doko_skat.doko', game_type='skat') }}">Skat</a></li>
+    <li><a href="{{ url_for('boggle.start_page') }}">Boggle (4x4, 5x5)</a></li>
+    <li><a href="{{ url_for('krazy.krazy_start') }}">Krazy Words</a></li>
+  </ul>
+
+  <p>To start a new game, just click on the link in the navigation bar
+    on the top right.</p>
+
+  <p>We also like the following web pages other people made:</p>
+  <ul>
+    <li><a href="https://www.horsepaste.com/examinations">Codenames</a></li>
+  </ul>
+{% endblock %}

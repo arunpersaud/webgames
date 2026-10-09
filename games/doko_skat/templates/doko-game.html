@@ -1,35 +1,33 @@
-{% extends "base.html"%}
-{% block title %}{{game.title}} with video conferences{% endblock%}
+{% extends "base.html" %}
+{% block title %}{{ game.title }} with video conferences{% endblock %}
 {% block css %}
-  <link rel="stylesheet" href="{{url_for('doko_skat.static', filename='cards.css')}}?v=1.0">
-{% endblock%}
+  <link rel="stylesheet" href="{{ url_for('doko_skat.static', filename='cards.css') }}">
+{% endblock %}
 {% block content %}
-  <h1>{{game.title}}</h1>
+  <h1>{{ game.title }}</h1>
 
-  <h3>This is game number {{nr}} for player {{player}} in session '{{seed}}'.</h3>
+  <p>This is game number {{ nr }} for player {{ player }} in session '{{ seed }}'.</p>
 
-  <p>Once you are finished with this game (and only then, since you will not be able to go back to this page):
-  <a href="/{{game.link}}/{{seed}}/{{nr+1}}/{{player}}"><button class="success">Next game</button></a></p>
+  <h2>Player {{ player }}'s cards</h2>
+  <div class="cards">
+    {% for c in cards %}
+    <img class="card" src="{{ url_for('doko_skat.static', filename=c) }}" alt="">
+    {% endfor %}
+  </div>
 
-
-  <p> Player {{player}}'s cards are: </p>
-  {% for c in cards %}
-    <img class="card" src="{{url_for('doko_skat.static', filename=c)}}"></img>
-  {% endfor %}
-
+  {% if suit|select|list %}
   <p>To make it easier to select these from your deck, here are your cards sorted by suit:</p>
-    {% for s in suit %}
-    <div>
-      {% for c in s %}
-      <img class="card" src="{{url_for('doko_skat.static', filename=c)}}"></img>
-      {% endfor %}
-    </div>
+  {% for s in suit if s %}
+  <div class="cards">
+    {% for c in s %}
+    <img class="card" src="{{ url_for('doko_skat.static', filename=c) }}" alt="">
+    {% endfor %}
+  </div>
   {% endfor %}
-
-  {% if game.link == "doko" %}
-  {% include "howto_doko.html" %}
-  {% elif game.link == "skat" %}
-  {% include "howto_skat.html" %}
   {% endif %}
 
-{% endblock%}
+  <p>Once you are finished with this game (and only then, since you will not be able to go back to this page):</p>
+  <p><a role="button" href="{{ url_for('doko_skat.display_cards', game_type=game.link, seed=seed, nr=nr + 1, player=player) }}">Next game</a></p>
+
+  {% include "howto_" ~ game.link ~ ".html" %}
+{% endblock %}

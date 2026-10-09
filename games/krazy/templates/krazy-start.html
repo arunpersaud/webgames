@@ -1,26 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Krazy Words with video conferences{% endblock%}
+{% block title %}Krazy Words with video conferences{% endblock %}
 {% block content %}
-<h1> Playing Krazy Words with video conference support</h1>
+  <h1>Krazy Words</h1>
 
   <p>How to play: have everyone you want to play with connected via video or voice chat.</p>
+  <p>To start a new game, enter a unique word below.</p>
 
-
-  <p>To start a new game, enter a unique word below</p>
-
-  <form method="POST">
-    Session name: <input name="name">
-    <select name="language">
-      <option value="de">Deutsch</option>
-    </select>
-    Number of players:
-    <select name="players">
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-      <option value="7">7</option>
-    </select>
-    <input type="submit" value="Start game">
+  <form method="post">
+    <label>Session name <input name="name" required></label>
+    <div class="grid">
+      <label>Language
+        <select name="language">
+          <option value="de">Deutsch</option>
+        </select>
+      </label>
+      <label>Number of players
+        <select name="players">
+          {% for n in range(3, 8) %}
+          <option value="{{ n }}">{{ n }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <button>Start game</button>
   </form>
 {% endblock %}

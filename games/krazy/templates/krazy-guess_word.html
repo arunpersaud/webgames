@@ -1,48 +1,43 @@
 {% extends "base.html" %}
-{% block title %}Krazy Words with video conferences{% endblock%}
+{% block title %}Krazy Words with video conferences{% endblock %}
 {% block content %}
-<h1> Playing Krazy Words with video conference support</h1>
-
+  <h1>Krazy Words</h1>
 
   {% set ns = namespace(nr=-1) %}
-  <p>words:
+  <h2>Words</h2>
   <ol>
     {% for w in words %}
     {% if w == myword %}
-    <li>*{{w}}*</li>
     {% set ns.nr = loop.index %}
+    <li><strong>{{ w }}</strong> (yours)</li>
     {% else %}
-    <li>{{w}}</li>
+    <li>{{ w }}</li>
     {% endif %}
     {% endfor %}
-    </ol>
-  </p>
+  </ol>
 
-  <form method="POST">
-  <p>
-    created words:
+  <h2>Which word does each created word describe?</h2>
+  <form method="post">
     <table>
       {% for w in created_words %}
       <tr>
-	<td>{{w}}</td>
-	<td>
-	  <select name="player-{{player}}-{{loop.index}}">
-	    {% if loop.index == player+1 %}
-	    <option value="{{ns.nr}}">{{ns.nr}}</option>
-	    {% else %}
-	    {% for w in words %}
-	    {% if loop.index != ns.nr %}
-	    <option value="{{loop.index}}">{{loop.index}}</option>
-	    {% endif %}
-	    {% endfor %}
-	    {% endif %}
-	  </select>
-	</td>
+        <td>{{ w }}</td>
+        <td>
+          <select name="player-{{ player }}-{{ loop.index }}" aria-label="Word number for {{ w }}">
+            {% if loop.index == player + 1 %}
+            <option value="{{ ns.nr }}">{{ ns.nr }}</option>
+            {% else %}
+            {% for w in words %}
+            {% if loop.index != ns.nr %}
+            <option value="{{ loop.index }}">{{ loop.index }}</option>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+          </select>
+        </td>
       </tr>
       {% endfor %}
     </table>
-  </p>
-    <input type="submit" value="submit my guess">
+    <button>Submit my guess</button>
   </form>
-
 {% endblock %}

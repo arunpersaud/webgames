@@ -18,13 +18,13 @@
   <form method="post" action="{{ url_for('boggle.restart', size=size, seed=seed) }}">
     <button>New board</button>
   </form>
-  <p>
-    <button type="button" data-rotate="-1">Rotate left</button>
-    <button type="button" data-rotate="1">Rotate right</button>
-    <button type="button" id="rotate-tiles">Rotate tiles randomly</button>
-  </p>
+  <div role="group">
+    <button type="button" class="secondary" data-rotate="-1">Rotate left</button>
+    <button type="button" class="secondary" data-rotate="1">Rotate right</button>
+    <button type="button" class="secondary" id="rotate-tiles">Rotate tiles</button>
+  </div>
 
-  <p>Time left: <span id="timer" data-seconds="{{ remaining }}">{{ "%d:%02d" % (remaining // 60, remaining % 60) }}</span></p>
+  <p class="timer">Time left: <span id="timer" data-seconds="{{ remaining }}">{{ "%d:%02d" % (remaining // 60, remaining % 60) }}</span></p>
 
   <table id="boggle" data-started="{{ started }}"
          data-update="{{ url_for('boggle.update', size=size, seed=seed) }}">

@@ -1,18 +1,22 @@
 #boggle {
-    margin: 0 auto;
-    font-size: xx-large;
+  width: auto;
+  margin: 2rem auto;
+  transition: transform 0.3s;
 }
 
 #boggle td {
-    width: 30px;
-    display:table-cell;
-    vertical-align:top;
-    min-height:30px;
-    text-align:center;
+  padding: 0.15rem;
+  border: none;
+  background: none;
 }
 
-#boggle td.highlight {
-    color: red;
-    background-color: grey;
+#boggle img {
+  display: block;
+  width: min(18vw, 90px);
+  transition: transform 0.3s;
 }
 
+.timer {
+  font-size: 1.5rem;
+  text-align: center;
+}

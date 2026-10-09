@@ -1,19 +1,12 @@
-{% extends "base.html"%}
-{% block title %}{{game.title}} with video conferences{% endblock%}
+{% extends "base.html" %}
+{% block title %}{{ game.title }} with video conferences{% endblock %}
 {% block content %}
-  <h1>{{game.title}}</h1>
+  <h1>{{ game.title }}</h1>
 
-  {% if game.link == "doko" %}
-  {% include "howto_doko.html" %}
-  {% elif game.link == "skat" %}
-  {% include "howto_skat.html" %}
-  {% endif %}
+  {% include "howto_" ~ game.link ~ ".html" %}
 
-  <p> Enter the name for a new session: </p>
-  <form method="POST">
-    <input name="name">
-    <input type="submit" value="Start session">
+  <form method="post">
+    <label>Name for a new session <input name="name" required></label>
+    <button>Start session</button>
   </form>
-
-{% endblock%}
-
+{% endblock %}

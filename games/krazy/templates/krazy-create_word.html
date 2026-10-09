@@ -1,25 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Krazy Words with video conferences{% endblock%}
+{% block title %}Krazy Words with video conferences{% endblock %}
 {% block css %}
-  <link rel="stylesheet" href="{{url_for('krazy.static', filename='krazy.css')}}?v=1.0">
+  <link rel="stylesheet" href="{{ url_for('krazy.static', filename='krazy.css') }}">
 {% endblock %}
 {% block content %}
-<h1> Playing Krazy Words with video conference support -- Game number {{nr}}</h1>
+  <h1>Krazy Words &ndash; round {{ nr }}</h1>
 
-  <p>Your word is:  {{word}}.</p>
+  <p>Your word is: <strong>{{ word }}</strong></p>
 
-<p>Your letters are:</p>
-<ul id="sortableList">
-  {% for l  in letters %}
-  <li>{{l}}</li>
-  {% endfor %}
-</ul>
-<p>(with javascript enabled, you can reorder the letter by drag&drop)</p>
-  <form method="POST">
-    Myguess: <input name="myword">
-    <input type="submit" value="submit my word">
+  <p>Your letters are:</p>
+  <ul id="sortableList" class="letters">
+    {% for l in letters %}
+    <li>{{ l }}</li>
+    {% endfor %}
+  </ul>
+  <p><small>(with javascript enabled, you can reorder the letters by drag &amp; drop)</small></p>
+
+  <form method="post">
+    <fieldset role="group">
+      <input name="myword" aria-label="Your word" placeholder="Your word">
+      <button>Submit my word</button>
+    </fieldset>
   </form>
-
 {% endblock %}
 
 {% block javascript %}

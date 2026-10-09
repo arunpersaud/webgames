@@ -1,4 +1,11 @@
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: var(--pico-spacing);
+}
+
 .card {
-  width:25%;
-  max-width:125px;
+  width: calc(25% - 0.25rem);
+  max-width: 125px;
 }

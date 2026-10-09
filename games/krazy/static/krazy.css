@@ -1,11 +1,19 @@
-li {
-    display: inline-block;
-    list-style-type: none;
-    list-style-position: inside;
-    border: 1px solid black;
-    width: 30px;
-    height: 30px;
-    font-size: large;
-    text-align: center;
-    line-height: 30px;
- }
+ul.letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+}
+
+ul.letters li {
+  list-style: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  border: var(--pico-border-width) solid var(--pico-form-element-border-color);
+  border-radius: var(--pico-border-radius);
+  font-size: 1.25rem;
+  line-height: 2.5rem;
+  text-align: center;
+  cursor: grab;
+}

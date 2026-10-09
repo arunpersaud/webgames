@@ -1,14 +1,10 @@
 {% extends "base.html" %}
-{% block title %}{{game.title}} with video conferences{% endblock %}
+{% block title %}{{ game.title }} with video conferences{% endblock %}
 {% block content %}
-  <h1>{{game.title}}</h1>
+  <h1>{{ game.title }}</h1>
 
-  {% if game.link == "doko" %}
-  {% include "howto_doko.html" %}
-  {% elif game.link == "skat" %}
-  {% include "howto_skat.html" %}
-  {% endif %}
+  <p class="flash" role="alert">This hand has already been used, please try another
+    <a href="{{ url_for('doko_skat.doko', game_type=game.link) }}">game name</a>.</p>
 
-  <p>This hand has already been used, please try another <a href="/{{game.link}}">game name</a>.</p>
-
+  {% include "howto_" ~ game.link ~ ".html" %}
 {% endblock %}

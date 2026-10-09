@@ -69,7 +69,7 @@ def test_full_round(client):
         page = client.get(f"/krazy/krazy1/1/{p}").get_data(as_text=True)
         data, used = {}, set()
         for name, options in re.findall(
-            r'<select name="([\w-]+)">(.*?)</select>', page, re.S
+            r'<select name="([\w-]+)"[^>]*>(.*?)</select>', page, re.S
         ):
             value = next(
                 v for v in re.findall(r'value="(\d+)"', options) if v not in used
@@ -83,7 +83,7 @@ def test_full_round(client):
     final = client.get("/krazy/krazy1/1/0/final")
     assert final.status_code == 200
     page = final.get_data(as_text=True)
-    assert "End of Round 1" in page
+    assert "end of round 1" in page
     assert page.count("(player") == 3  # one row per guess
     # the next round is prepared
     assert client.get("/krazy/krazy1/2").status_code == 200

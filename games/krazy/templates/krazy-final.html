@@ -1,29 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Krazy Words with video conferences{% endblock%}
+{% block title %}Krazy Words with video conferences{% endblock %}
 {% block content %}
-<h1> Playing Krazy Words with video conference support  -- Game number {{nr}}</h1>
+  <h1>Krazy Words &ndash; end of round {{ nr }}</h1>
 
-<h2> End of Round {{nr}}</h2>
-
-<table>
-  <tr>
-    <th> player \ words </th>
-    {% for w in words %}
-    <th>{{w}}</th>
-    {% endfor %}
-  </tr>
-  {% for p in guesses %}
-  <tr>
-  {% for e in p %}
-  <td style="border:1px solid #aaa;">{{e}}</td>
-  {% endfor %}
-  </tr>
-  {% endfor %}
-  <table>
+  <div class="overflow-auto">
+    <table class="striped">
+      <thead>
+        <tr>
+          <th>player \ words</th>
+          {% for w in words %}
+          <th>{{ w }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in guesses %}
+        <tr>
+          {% for e in p %}
+          <td>{{ e }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
   <p>Please reload when all players made their guesses.</p>
 
-  <p>To start the next round, please use <a href="/krazy/{{seed}}/{{nr+1}}/{{player}}">this link</a>.</p>
-  <p>To start a completely new game, please visit the <a href="/krazy">starting page</a> again.</p>
-
+  <p><a role="button" href="{{ url_for('krazy.krazy_play', seed=seed, nr=nr + 1, player=player) }}">Next round</a></p>
+  <p>To start a completely new game, please visit the <a href="{{ url_for('krazy.krazy_start') }}">starting page</a> again.</p>
 {% endblock %}

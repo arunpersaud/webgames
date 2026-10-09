@@ -1,27 +1,17 @@
-{% extends "base.html"%}
-{% block title %}{{game.title}} with video conferences{% endblock%}
+{% extends "base.html" %}
+{% block title %}{{ game.title }} with video conferences{% endblock %}
 {% block content %}
-  <h1>{{game.title}}</h1>
+  <h1>{{ game.title }}</h1>
 
-  {% if game.link == "doko" %}
-  {% include "howto_doko.html" %}
-  {% elif game.link == "skat" %}
-  {% include "howto_skat.html" %}
-  {% endif %}
-  
-  <h3>Game number {{nr}} in '{{seed}}'</h3>
+  {% include "howto_" ~ game.link ~ ".html" %}
+
+  <h2>Game number {{ nr }} in '{{ seed }}'</h2>
   <ul>
     {% for name, viewed in players.items() %}
-    <li> <a href="/{{game.link}}/{{seed}}/{{nr}}/{{name}}">Player {{name}}</a>
-      {% if viewed == 0 %}
-      (not viewed)
-      {% else %}
-      (viewed)
-      {% endif %}
-    </li>
+    <li><a href="{{ url_for('doko_skat.display_cards', game_type=game.link, seed=seed, nr=nr, player=name) }}">Player {{ name }}</a>
+      ({{ "viewed" if viewed else "not viewed" }})</li>
     {% endfor %}
   </ul>
 
   <p>You can keep this page open or reload it to see if everyone has seen their cards.</p>
-
-{% endblock%}
+{% endblock %}

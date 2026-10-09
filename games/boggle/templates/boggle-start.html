@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Boggle with video conferences{% endblock%}
+{% block title %}Boggle with video conferences{% endblock %}
 {% block content %}
-<h1> Playing Boggle with video conference support</h1>
+  <h1>Boggle</h1>
 
   <p>How to play: have everyone you want to play with connected via video or voice chat.</p>
+  <p>To start a new game, enter a unique word below.</p>
 
-
-  <p>To start a new game, enter a unique word below</p>
-
-  <form method="POST">
-    <input name="name">
-    <select name="size">
-      <option value="4">4x4</option>
-      <option value="5">5x5</option>
-    </select>
-    <input type="submit" value="Start game">
+  <form method="post">
+    <label>Game name <input name="name" required></label>
+    <label>Board size
+      <select name="size">
+        <option value="4">4x4</option>
+        <option value="5">5x5</option>
+      </select>
+    </label>
+    <button>Start game</button>
   </form>
 {% endblock %}
