@@ -13,7 +13,6 @@ Both secrets are required unless the app runs in debug or testing mode.
 
 import os
 
-import secure
 from flask import Flask, render_template
 
 from . import db
@@ -22,12 +21,27 @@ from .doko_skat.views import doko_skat
 from .krazy.views import krazy
 from .util import SessionNameConverter
 
-# no CSP yet: boggle loads jquery from a CDN, krazy uses an inline script
-secure_headers = secure.Secure(
-    xcto=secure.XContentTypeOptions(),
-    xfo=secure.XFrameOptions().sameorigin(),
-    referrer=secure.ReferrerPolicy().strict_origin_when_cross_origin(),
-)
+# Everything is served from this site: no inline scripts or styles, no
+# CDNs. data: images are the icons inside pico.min.css.
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "; ".join(
+        [
+            "default-src 'none'",
+            "script-src 'self'",
+            "style-src 'self'",
+            "img-src 'self' data:",
+            "connect-src 'self'",
+            "form-action 'self'",
+            "base-uri 'none'",
+            "frame-ancestors 'none'",
+        ]
+    ),
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+}
 
 
 def create_app(test_config: dict | None = None) -> Flask:
@@ -47,8 +61,8 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.url_map.converters["name"] = SessionNameConverter
 
     @app.after_request
-    def set_secure_headers(response):
-        secure_headers.set_headers(response)
+    def set_security_headers(response):
+        response.headers.update(SECURITY_HEADERS)
         return response
 
     app.register_blueprint(boggle)
