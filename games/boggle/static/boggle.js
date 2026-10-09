@@ -1,35 +1,37 @@
-var pagetimer = $("#timer");
-var age = $("#age");
-var boggle = $("#boggle");
+// Boggle board: count down, reload when someone starts a new board, and
+// let each player rotate the board or the tiles.
+const board = document.getElementById("boggle");
+const timer = document.getElementById("timer");
+let remaining = Number(timer.dataset.seconds);
+let angle = 0;
 
-async function update_page() {
-    let response = await fetch(window.location.href+'/update');
-    let data = await response.json();
-    if (data > 0) {
-	var current = Number(age.html());
-	if (data > current)
-	    location.reload();
+async function tick() {
+  remaining = Math.max(remaining - 1, 0);
+  const seconds = String(remaining % 60).padStart(2, "0");
+  timer.textContent = `${Math.floor(remaining / 60)}:${seconds}`;
+
+  try {
+    const response = await fetch(board.dataset.update, { cache: "no-store" });
+    const data = await response.json();
+    if (data.started > Number(board.dataset.started)) {
+      location.reload();
     }
-
-    var value = Number(pagetimer.html());
-    pagetimer.html(value-1);
+  } catch {
+    // network hiccup: try again on the next tick
+  }
 }
 
-function start_game() {
-    fetch(window.location.href+'/start');
+setInterval(tick, 1000);
+
+for (const button of document.querySelectorAll("[data-rotate]")) {
+  button.addEventListener("click", () => {
+    angle += 90 * Number(button.dataset.rotate);
+    board.style.transform = `rotate(${angle}deg)`;
+  });
 }
 
-var setTime = setInterval( update_page, 1000 );
-
-var step = 0 ;
-function rotate(d) {
-    step += d;
-    boggle.css('transform', 'rotate('+ step*90 +'deg)');
-}
-
-function rotate_tiles() {
-    $('#boggle td img').each(function() {
-	var orientation = Math.floor(Math.random() * 4);
-	$(this).css('transform', 'rotate('+ orientation*90 +'deg)');
-    });
-}
+document.getElementById("rotate-tiles").addEventListener("click", () => {
+  for (const tile of board.querySelectorAll("img")) {
+    tile.style.transform = `rotate(${90 * Math.floor(Math.random() * 4)}deg)`;
+  }
+});

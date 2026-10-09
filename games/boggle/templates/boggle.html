@@ -1,41 +1,43 @@
 {% extends "base.html" %}
-{% block title %}Boggle with video conferences{% endblock%}
+{% block title %}Boggle with video conferences{% endblock %}
 {% block css %}
-  <link rel="stylesheet" href="{{url_for('boggle.static', filename='boggle.css')}}?v=1.0">
-{% endblock%}
+  <link rel="stylesheet" href="{{ url_for('boggle.static', filename='boggle.css') }}">
+{% endblock %}
 {% block content %}
-  <h1> Playing Boggle with video conference support</h1>
+  <h1>Boggle</h1>
 
-  <p>How to play:
-    <ul>
-      <li>have everyone you want to play with connected via video or voice chat.</li>
-      <li>Everyone should load this page: <a href="/boggle/{{ size }}x{{ size }}/{{ seed }}">boggle/{{ size }}x{{ size }}/{{ seed }}</a></li>
-      <li>Once everyone is ready, have someone hit the start button. </li>
-      <li>Play until the timer gets to zero</li>
-    </ul>
+  <p>How to play:</p>
+  <ul>
+    <li>have everyone you want to play with connected via video or voice chat.</li>
+    <li>Everyone should load this page:
+      <a href="{{ url_for('boggle.board', size=size, seed=seed) }}">{{ url_for('boggle.board', size=size, seed=seed, _external=True) }}</a></li>
+    <li>Once everyone is ready, have someone hit the "New board" button.</li>
+    <li>Play until the timer gets to zero.</li>
+  </ul>
+
+  <form method="post" action="{{ url_for('boggle.restart', size=size, seed=seed) }}">
+    <button>New board</button>
+  </form>
+  <p>
+    <button type="button" data-rotate="-1">Rotate left</button>
+    <button type="button" data-rotate="1">Rotate right</button>
+    <button type="button" id="rotate-tiles">Rotate tiles randomly</button>
   </p>
 
-  
-  <button onclick="start_game()">New Game</button>
-  <button onclick="rotate(-1)">Rotate Left</button>
-  <button onclick="rotate(1)">Rotate Right</button>
-  <button onclick="rotate_tiles()">Rotate Tiles randomly</button>
+  <p>Time left: <span id="timer" data-seconds="{{ remaining }}">{{ "%d:%02d" % (remaining // 60, remaining % 60) }}</span></p>
 
-  Timer: <span id="timer"> 180 </span>
-
-  <table id="boggle" class="degree_0">
-    {% for i in range(size) %}
+  <table id="boggle" data-started="{{ started }}"
+         data-update="{{ url_for('boggle.update', size=size, seed=seed) }}">
+    {% for i in range(n) %}
     <tr>
-      {% for j in range(size) %}
-      <td><img src="{{url_for('boggle.static', filename='/images/tile_{}.png'.format(boggle[i+size*j]))}}"></td>
+      {% for j in range(n) %}
+      {% set letter = letters[i + n * j] %}
+      <td><img src="{{ url_for('boggle.static', filename='images/tile_' ~ letter ~ '.png') }}" alt="{{ letter }}"></td>
       {% endfor %}
     </tr>
     {% endfor %}
   </table>
-
-  <button id="age"> {{ fileage }} </button>
-{% endblock%}
+{% endblock %}
 {% block javascript %}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="{{url_for('boggle.static', filename='boggle.js')}}"></script>
-{% endblock%}
+  <script src="{{ url_for('boggle.static', filename='boggle.js') }}"></script>
+{% endblock %}
