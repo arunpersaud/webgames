@@ -8,7 +8,7 @@ import random
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict
 
-from flask import Blueprint, render_template, request, redirect, current_app
+from flask import Blueprint, render_template, request, redirect, current_app, abort
 
 doko_skat = Blueprint(
     "doko_skat",
@@ -185,6 +185,11 @@ def display_cards(
     an error, otherwise, we render the cards
     """
     nr = int(nr)
+
+    # tags are lines in a text file: no spaces/newlines from the URL
+    valid_players = ("A", "B", "C", "D") if game_type == "doko" else ("A", "B", "C", "skat")
+    if not seed.isalnum() or player not in valid_players:
+        abort(404)
 
     STORAGE, game = select_game_type(game_type)
 

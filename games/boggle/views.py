@@ -2,7 +2,7 @@ from pathlib import Path
 import random
 import time
 
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, render_template, request, redirect, abort
 from ..util import nocache
 
 boggle = Blueprint(
@@ -14,6 +14,7 @@ boggle = Blueprint(
 )
 
 BOGGLE_TIME = 5 * 60
+SIZES = ("4x4", "5x5")
 
 
 def generate_4x4():
@@ -105,6 +106,8 @@ def load_boggle(filename):
 @boggle.route("/boggle/<size>/<seed>/start")
 @nocache
 def start_boggle(size, seed):
+    if size not in SIZES:
+        abort(404)
     if size == "4x4":
         generate_boggle_file(generate_4x4, "{}-{}.txt".format(seed, size))
     else:
@@ -115,6 +118,8 @@ def start_boggle(size, seed):
 @boggle.route("/boggle/<size>/<seed>/update")
 @nocache
 def create_boggle(size, seed):
+    if size not in SIZES:
+        abort(404)
     FILE = Path("tmp") / "{}-{}.txt".format(seed, size)
     if not FILE.exists():
         return "{-2}"
@@ -134,6 +139,8 @@ def create_boggle_game():
     seed = out
 
     size = int(request.form["size"])
+    if not seed or size not in (4, 5):
+        abort(400)
 
     if size == 4:
         generate_boggle_file(generate_4x4, "{}-4x4.txt".format(seed))
@@ -148,6 +155,8 @@ def create_boggle_game():
 def boggle_4x4(seed=None, size="4x4"):
 
     if seed is not None:
+        if size not in SIZES:
+            abort(404)
         if size == "4x4":
             s = 4
         else:

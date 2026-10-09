@@ -20,17 +20,22 @@ except ModuleNotFoundError:
 
 
 app = Flask(__name__)
-secure_headers = secure.Secure()
+# no CSP yet: boggle loads jquery from a CDN, krazy uses an inline script
+secure_headers = secure.Secure(
+    xcto=secure.XContentTypeOptions(),
+    xfo=secure.XFrameOptions().sameorigin(),
+    referrer=secure.ReferrerPolicy().strict_origin_when_cross_origin(),
+)
 
 
 @app.after_request
 def set_secure_headers(response):
-    secure_headers.framework.flask(response)
+    secure_headers.set_headers(response)
     return response
 
 
 app.secret_key = os.urandom(12).hex()
-if app.config["ENV"] == "development":
+if app.debug:
     app.config.from_object(DevelopmentConfig())
     print(" * Using devel config")
 else:

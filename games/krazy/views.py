@@ -153,6 +153,8 @@ def create_krazy_game():
 
     seed = ensure_alphanum(request.form["name"])
     nr_players = int(request.form["players"])
+    if not 1 <= nr_players <= MAX_PLAYERS:
+        abort(400)
 
     combined_seed = seed + str(nr) + current_app.config["SECRET_SEED"]
     random.seed(combined_seed)
