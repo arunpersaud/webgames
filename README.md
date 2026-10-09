@@ -28,3 +28,15 @@ Development uses [uv](https://docs.astral.sh/uv/):
 
 We use [ruff](https://docs.astral.sh/ruff/) for linting and formatting. To run it
 automatically on every commit: `uvx pre-commit install`.
+
+# Deployment
+
+The `Containerfile` builds a production image (Python 3.14, gunicorn on
+port 8000, dependencies from `uv.lock`):
+
+    podman build -t webgames .
+    podman run -p 8000:8000 -v ./data:/data \
+        -e FLASK_SECRET_KEY=... -e FLASK_SECRET_SEED=... webgames
+
+Game state is kept in `/data/webgames.sqlite`; games untouched for a week
+are deleted.
