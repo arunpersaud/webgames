@@ -4,13 +4,14 @@ from pathlib import Path
 
 from flask import (
     Blueprint,
+    abort,
+    current_app,
+    flash,
+    redirect,
     render_template,
     request,
-    redirect,
-    abort,
-    flash,
-    current_app,
 )
+
 from ..util import ensure_alphanum
 
 krazy = Blueprint(
@@ -116,10 +117,7 @@ def create_new_game(language, seed, nr, nr_players):
         tmp["word"] = words[i]
         player_info.append(tmp)
     out["player-info"] = player_info
-    if nr_players <= 5:
-        words = words[:6]
-    else:
-        words = words[: nr_players + 1]
+    words = words[:6] if nr_players <= 5 else words[: nr_players + 1]
     # shuffle again, since at the moment the words are ordered by player
     words = random.sample(words, len(words))
     out["words"] = words
@@ -240,11 +238,14 @@ def krazy_play_submit(seed, nr, player):
 
         # ensure that the correct letters are used
         letters, word = load_player_data(seed, nr, player)
-        for l in myword:
-            if l in letters:
-                letters.remove(l)
+        for letter in myword:
+            if letter in letters:
+                letters.remove(letter)
             else:
-                flash(f"Letter -{l}- not in your list of letters (or not often enough)")
+                flash(
+                    f"Letter -{letter}- not in your list of letters"
+                    " (or not often enough)"
+                )
                 return redirect(f"/krazy/{seed}/{nr}/{player}")
 
         with (tmpdir / f"{seed}-{nr}-player{player}.txt").open("w") as f:
@@ -288,7 +289,7 @@ def krazy_final(seed, nr, player):
 
     # get ready for next round
     tmpdir = make_tmpdir()
-    datafile = tmpdir / f"{seed}-{nr+1}.json"
+    datafile = tmpdir / f"{seed}-{nr + 1}.json"
 
     if not datafile.exists():
         create_new_game(language, seed, nr + 1, nr_players)

@@ -15,9 +15,9 @@ def substitute(letter):
 
 
 def getParams(letter):
-    bone = "\#eaeaea"
-    brown = "\#753010"
-    dark = "\#332222"
+    bone = r"\#eaeaea"
+    brown = r"\#753010"
+    dark = r"\#332222"
     params = {}
     if letter == "Qu":
         params["background_color"] = brown

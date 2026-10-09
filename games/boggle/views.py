@@ -1,8 +1,9 @@
-from pathlib import Path
 import random
 import time
+from pathlib import Path
 
-from flask import Blueprint, render_template, request, redirect, abort
+from flask import Blueprint, abort, redirect, render_template, request
+
 from ..util import nocache
 
 boggle = Blueprint(
@@ -37,7 +38,7 @@ def generate_4x4():
         ["N", "U", "I", "H", "M", "Qu"],
     ]
     random.shuffle(letters)
-    boggle_text = ",".join([random.choice(l) for l in letters])
+    boggle_text = ",".join([random.choice(die) for die in letters])
     return boggle_text
 
 
@@ -70,7 +71,7 @@ def generate_5x5():
         ["O", "O", "O", "T", "T", "U"],
     ]
     random.shuffle(letters)
-    boggle_text = ",".join([random.choice(l) for l in letters])
+    boggle_text = ",".join([random.choice(die) for die in letters])
     return boggle_text
 
 
@@ -109,9 +110,9 @@ def start_boggle(size, seed):
     if size not in SIZES:
         abort(404)
     if size == "4x4":
-        generate_boggle_file(generate_4x4, "{}-{}.txt".format(seed, size))
+        generate_boggle_file(generate_4x4, f"{seed}-{size}.txt")
     else:
-        generate_boggle_file(generate_5x5, "{}-{}.txt".format(seed, size))
+        generate_boggle_file(generate_5x5, f"{seed}-{size}.txt")
     return "{started: 1}"
 
 
@@ -120,7 +121,7 @@ def start_boggle(size, seed):
 def create_boggle(size, seed):
     if size not in SIZES:
         abort(404)
-    FILE = Path("tmp") / "{}-{}.txt".format(seed, size)
+    FILE = Path("tmp") / f"{seed}-{size}.txt"
     if not FILE.exists():
         return "{-2}"
 
@@ -143,11 +144,11 @@ def create_boggle_game():
         abort(400)
 
     if size == 4:
-        generate_boggle_file(generate_4x4, "{}-4x4.txt".format(seed))
-        return redirect("/boggle/4x4/{}".format(seed))
+        generate_boggle_file(generate_4x4, f"{seed}-4x4.txt")
+        return redirect(f"/boggle/4x4/{seed}")
     if size == 5:
-        generate_boggle_file(generate_5x5, "{}-5x5.txt".format(seed))
-        return redirect("/boggle/5x5/{}".format(seed))
+        generate_boggle_file(generate_5x5, f"{seed}-5x5.txt")
+        return redirect(f"/boggle/5x5/{seed}")
 
 
 @boggle.route("/boggle/<size>/<seed>")
@@ -157,12 +158,9 @@ def boggle_4x4(seed=None, size="4x4"):
     if seed is not None:
         if size not in SIZES:
             abort(404)
-        if size == "4x4":
-            s = 4
-        else:
-            s = 5
+        s = 4 if size == "4x4" else 5
 
-        boggle_text, t = load_boggle("{}-{}.txt".format(seed, size))
+        boggle_text, t = load_boggle(f"{seed}-{size}.txt")
         return render_template(
             "boggle.html", boggle=boggle_text, fileage=t, size=s, seed=seed
         )

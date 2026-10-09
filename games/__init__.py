@@ -1,8 +1,8 @@
-import sys
 import os
+import sys
 
-from flask import Flask, render_template
 import secure
+from flask import Flask, render_template
 
 # import the different games
 from .boggle.views import boggle
@@ -10,7 +10,7 @@ from .doko_skat.views import doko_skat
 from .krazy.views import krazy
 
 try:
-    from .config import ProductionConfig, DevelopmentConfig
+    from .config import DevelopmentConfig, ProductionConfig
 except ModuleNotFoundError:
     print("Error: please copy config_template.py to config.py")
     print("       and set the following variables:")

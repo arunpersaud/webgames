@@ -18,7 +18,13 @@ Vision: Webify common board games so friends can play with each other using the 
 
 
 # Source
-The source can be found on [https://github.com/arunpersaud/webgames](github). Pull request welcomed.
-We use black to format the code, to make sure your code is formatted correctly, you can do the following once before you run git commit:
-* pip install pre-commit
-* pre-commit install
+The source can be found on [github](https://github.com/arunpersaud/webgames). Pull requests welcome.
+
+Development uses [uv](https://docs.astral.sh/uv/):
+
+    uv sync                 # create .venv with all dependencies
+    uv run pytest           # run the tests
+    uv run flask --app games run --debug
+
+We use [ruff](https://docs.astral.sh/ruff/) for linting and formatting. To run it
+automatically on every commit: `uvx pre-commit install`.

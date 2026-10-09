@@ -6,9 +6,8 @@ Blueprint for playing Skat and Doppelkopf online.
 
 import random
 from pathlib import Path
-from typing import List, Optional, Tuple, Dict
 
-from flask import Blueprint, render_template, request, redirect, current_app, abort
+from flask import Blueprint, abort, current_app, redirect, render_template, request
 
 doko_skat = Blueprint(
     "doko_skat",
@@ -19,7 +18,7 @@ doko_skat = Blueprint(
 )
 
 
-def shuffle_cards(seed: str, nr: int, number_of_cards: int) -> List[int]:
+def shuffle_cards(seed: str, nr: int, number_of_cards: int) -> list[int]:
     """Return a shuffled list of cards.
 
     The cards are just integer number between 0, 1,..., number_of_cards-1.
@@ -34,7 +33,7 @@ def shuffle_cards(seed: str, nr: int, number_of_cards: int) -> List[int]:
     return cards
 
 
-def get_doko_cards(seed: str, nr: int, player: str) -> List[str]:
+def get_doko_cards(seed: str, nr: int, player: str) -> list[str]:
     """For a given seed and player, return the players list of cards as png files."""
     cards = shuffle_cards(seed, nr, 48)
     # pick the card for the player
@@ -50,11 +49,11 @@ def get_doko_cards(seed: str, nr: int, player: str) -> List[str]:
     cards = [2 * (c // 2) + 1 for c in cards]
     # the png files are sorted in the correct way, e.g. 0 is the ten of hearts, etc.
     cards = sorted(cards)
-    cards = ["doko/{}.png".format(c) for c in cards]
+    cards = [f"doko/{c}.png" for c in cards]
     return cards
 
 
-def get_skat_cards(seed: str, nr: int, player: str) -> List[str]:
+def get_skat_cards(seed: str, nr: int, player: str) -> list[str]:
     """For a given seed and player, return the players list of cards as png files."""
     cards = shuffle_cards(seed, nr, 32)
     if player == "A":
@@ -67,20 +66,20 @@ def get_skat_cards(seed: str, nr: int, player: str) -> List[str]:
         cards = cards[30:]
     # the png files are sorted in the correct way, e.g. 0 is the ten of hearts, etc.
     cards = sorted(cards)
-    cards = ["skat/{}.png".format(c) for c in cards]
+    cards = [f"skat/{c}.png" for c in cards]
     return cards
 
 
-def doko_sort_cards_by_suit(cards: List[str]) -> Tuple[List[str]]:
+def doko_sort_cards_by_suit(cards: list[str]) -> tuple[list[str]]:
     clubs = [3, 11, 27, 29, 31, 33]
     spades = [5, 13, 35, 37, 39, 41]
     hearts = [1, 7, 15, 43, 45, 47]
     diamonds = [9, 17, 19, 21, 23, 25]
 
-    clubs = ["doko/{}.png".format(n) for n in clubs]
-    spades = ["doko/{}.png".format(n) for n in spades]
-    hearts = ["doko/{}.png".format(n) for n in hearts]
-    diamonds = ["doko/{}.png".format(n) for n in diamonds]
+    clubs = [f"doko/{n}.png" for n in clubs]
+    spades = [f"doko/{n}.png" for n in spades]
+    hearts = [f"doko/{n}.png" for n in hearts]
+    diamonds = [f"doko/{n}.png" for n in diamonds]
 
     my_clubs = [c for c in cards if c in clubs]
     my_spades = [c for c in cards if c in spades]
@@ -89,7 +88,8 @@ def doko_sort_cards_by_suit(cards: List[str]) -> Tuple[List[str]]:
 
     return my_clubs, my_spades, my_hearts, my_diamonds
 
-def select_game_type(game_type:str) -> Tuple[Path, Dict]:
+
+def select_game_type(game_type: str) -> tuple[Path, dict]:
     """Return game specific settings."""
     if game_type == "doko":
         db = Path("tmp") / "doko.db"
@@ -99,23 +99,25 @@ def select_game_type(game_type:str) -> Tuple[Path, Dict]:
         game = {"title": "Skat", "link": "skat"}
     return db, game
 
-def tag_exists(tag:str, db: Path)->bool:
+
+def tag_exists(tag: str, db: Path) -> bool:
     """Check if tag is in database.
 
     Assumes a file based storage/db.
     """
     if db.exists():
         with db.open("r") as f:
-            for l in f:
-                if l.startswith(tag):
+            for line in f:
+                if line.startswith(tag):
                     return True
     return False
 
-def add_tag(tag:str, db:Path)->None:
+
+def add_tag(tag: str, db: Path) -> None:
     """Add a tag to the database."""
     if db.exists():
         with db.open("a") as f:
-            f.write("{}\n".format(tag))
+            f.write(f"{tag}\n")
 
 
 @doko_skat.route("/<game_type>")
@@ -154,6 +156,7 @@ def display_game(
         "doko-start.html", seed=seed, nr=nr, players=players, game=game
     )
 
+
 @doko_skat.route("/<game_type>", methods=["POST"])
 def start_game(
     game_type="doko",
@@ -171,6 +174,7 @@ def start_game(
     seed = out
     return redirect(f"/{game_type}/{seed}/1")
 
+
 @doko_skat.route("/<game_type>/<seed>/<nr>/<player>")
 def display_cards(
     game_type="doko",
@@ -187,7 +191,9 @@ def display_cards(
     nr = int(nr)
 
     # tags are lines in a text file: no spaces/newlines from the URL
-    valid_players = ("A", "B", "C", "D") if game_type == "doko" else ("A", "B", "C", "skat")
+    valid_players = (
+        ("A", "B", "C", "D") if game_type == "doko" else ("A", "B", "C", "skat")
+    )
     if not seed.isalnum() or player not in valid_players:
         abort(404)
 
@@ -207,6 +213,11 @@ def display_cards(
     add_tag(tag, STORAGE)
 
     return render_template(
-        "doko-game.html", cards=cards, suit=suit, nr=nr, seed=seed, player=player, game=game
+        "doko-game.html",
+        cards=cards,
+        suit=suit,
+        nr=nr,
+        seed=seed,
+        player=player,
+        game=game,
     )
-

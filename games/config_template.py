@@ -1,4 +1,4 @@
-class Config(object):
+class Config:
     DEBUG = False
     TESTING = False
     SECRET_KEY = ""  # needs to be set
