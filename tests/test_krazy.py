@@ -1,0 +1,73 @@
+import re
+
+import pytest
+
+
+def start(client, players=3):
+    return client.post(
+        "/krazy", data={"name": "Krazy 1", "players": players, "language": "de"}
+    )
+
+
+def letters(page):
+    block = page.split('id="sortableList"')[1].split("</ul>")[0]
+    return re.findall(r"<li>(\w)</li>", block)
+
+
+def test_start_game(client):
+    page = start(client).get_data(as_text=True)
+    assert re.findall(r"/krazy/krazy1/1/(\d)", page) == ["0", "1", "2"]
+
+
+@pytest.mark.parametrize("players", [0, 8, 10**9])
+def test_player_limit(client, players):
+    assert start(client, players).status_code == 400
+
+
+def test_unknown_game(client):
+    assert client.get("/krazy/nothere/1/0").status_code == 404
+
+
+def test_full_round(client):
+    start(client)
+    # each player builds a word from their letters
+    for p in range(3):
+        page = client.get(f"/krazy/krazy1/1/{p}").get_data(as_text=True)
+        mine = letters(page)
+        assert len(mine) == 9
+        response = client.post(
+            f"/krazy/krazy1/1/{p}", data={"myword": "".join(mine[:3])}
+        )
+        assert response.status_code == 302
+
+    # every player assigns each created word to a different word number
+    for p in range(3):
+        page = client.get(f"/krazy/krazy1/1/{p}").get_data(as_text=True)
+        data, used = {}, set()
+        for name, options in re.findall(
+            r'<select name="([\w-]+)">(.*?)</select>', page, re.S
+        ):
+            value = next(
+                v for v in re.findall(r'value="(\d+)"', options) if v not in used
+            )
+            used.add(value)
+            data[name] = value
+        assert len(data) == 3
+        response = client.post(f"/krazy/krazy1/1/{p}", data=data)
+        assert response.headers["Location"] == f"/krazy/krazy1/1/{p}/final"
+
+    final = client.get("/krazy/krazy1/1/0/final")
+    assert final.status_code == 200
+    page = final.get_data(as_text=True)
+    assert "End of Round 1" in page
+    assert page.count("(player") == 3  # one row per guess
+    # the next round is prepared
+    assert client.get("/krazy/krazy1/2").status_code == 200
+
+
+def test_wrong_letters_are_rejected(client):
+    start(client)
+    response = client.post("/krazy/krazy1/1/0", data={"myword": "qqqqqqqqqqqq"})
+    assert response.status_code == 302
+    page = client.get("/krazy/krazy1/1/0").get_data(as_text=True)
+    assert "not in your list of letters" in page
