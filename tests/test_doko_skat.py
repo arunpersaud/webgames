@@ -64,3 +64,11 @@ def test_deal_is_deterministic(client, tmp_path):
 )
 def test_invalid_urls(client, url):
     assert client.get(url).status_code == 404
+
+
+def test_deal_does_not_touch_global_random(client):
+    import random
+
+    state = random.getstate()
+    hand(client, "doko", "s1", 1, "A")
+    assert random.getstate() == state

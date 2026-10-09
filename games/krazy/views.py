@@ -82,6 +82,7 @@ def get_list_of_created_words(seed: str, nr: int):
 
 
 def create_new_game(language, seed, nr, nr_players):
+    rng = random.Random(seed + str(nr) + current_app.config["SECRET_SEED"])
 
     tmpdir = data_dir()
 
@@ -97,9 +98,9 @@ def create_new_game(language, seed, nr, nr_players):
     input_file = RESOURCES / f"{language}.txt"
     with input_file.open() as f:
         data = json.load(f)
-        vowels = random.sample(data["vowels"], len(data["vowels"]))
-        consonants = random.sample(data["consonants"], len(data["consonants"]))
-        words = random.sample(data["words"], len(data["words"]))
+        vowels = rng.sample(data["vowels"], len(data["vowels"]))
+        consonants = rng.sample(data["consonants"], len(data["consonants"]))
+        words = rng.sample(data["words"], len(data["words"]))
 
     # create session file that stores the data for each player and a
     # list of all words in play
@@ -113,7 +114,7 @@ def create_new_game(language, seed, nr, nr_players):
     out["player-info"] = player_info
     words = words[:6] if nr_players <= 5 else words[: nr_players + 1]
     # shuffle again, since at the moment the words are ordered by player
-    words = random.sample(words, len(words))
+    words = rng.sample(words, len(words))
     out["words"] = words
     out["language"] = language
 
@@ -147,9 +148,6 @@ def create_krazy_game():
     nr_players = int(request.form["players"])
     if not 1 <= nr_players <= MAX_PLAYERS:
         abort(400)
-
-    combined_seed = seed + str(nr) + current_app.config["SECRET_SEED"]
-    random.seed(combined_seed)
 
     language = request.form["language"]
     if language not in LANGUAGES:

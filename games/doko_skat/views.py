@@ -29,9 +29,9 @@ def shuffle_cards(seed: str, nr: int, number_of_cards: int) -> list[int]:
     cards are used.
 
     """
-    random.seed(seed + str(nr) + current_app.config["SECRET_SEED"])
+    rng = random.Random(seed + str(nr) + current_app.config["SECRET_SEED"])
     cards = list(range(number_of_cards))
-    random.shuffle(cards)
+    rng.shuffle(cards)
     return cards
 
 
