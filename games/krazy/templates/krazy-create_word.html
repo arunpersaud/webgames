@@ -23,9 +23,6 @@
 {% endblock %}
 
 {% block javascript %}
-<!-- Latest Sortable -->
-<script src="{{url_for('krazy.static', filename='Sortable.js')}}?v=1.0"></script>
-<script>
-    Sortable.create(sortableList, { /* options */ });
-</script>
+<script src="{{ url_for('krazy.static', filename='Sortable.min.js') }}"></script>
+<script src="{{ url_for('krazy.static', filename='krazy.js') }}"></script>
 {% endblock %}
