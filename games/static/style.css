@@ -8,3 +8,8 @@
 footer {
   border-top: var(--pico-border-width) solid var(--pico-muted-border-color);
 }
+
+.flash a {
+  color: inherit;
+  text-decoration: underline;
+}
