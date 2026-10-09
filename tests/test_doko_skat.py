@@ -49,7 +49,7 @@ def test_deals_differ_per_game_and_session(client):
 
 def test_deal_is_deterministic(client, tmp_path):
     first = hand(client, "doko", "s1", 1, "A")
-    (tmp_path / "tmp" / "doko.db").write_text("")  # forget the "seen" tag
+    (tmp_path / "doko.db").write_text("")  # forget the "seen" tag
     assert hand(client, "doko", "s1", 1, "A") == first
 
 

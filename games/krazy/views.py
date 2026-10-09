@@ -12,7 +12,7 @@ from flask import (
     request,
 )
 
-from ..util import ensure_alphanum
+from ..util import data_dir, ensure_alphanum
 
 krazy = Blueprint(
     "krazy",
@@ -23,19 +23,13 @@ krazy = Blueprint(
 )
 
 
+RESOURCES = Path(__file__).parent / "resource"
 LANGUAGES = ["de"]
 MAX_PLAYERS = 7
 
 
-def make_tmpdir():
-    """Ensure tmp directory exists"""
-    tmpdir = Path("tmp")
-    tmpdir.mkdir(parents=True, exist_ok=True)
-    return tmpdir
-
-
 def load_game_data(seed: str, nr: int):
-    tmpdir = make_tmpdir()
+    tmpdir = data_dir()
     datafile = tmpdir / f"{seed}-{nr}.json"
 
     if not datafile.exists():
@@ -51,7 +45,7 @@ def load_game_data(seed: str, nr: int):
 
 
 def load_player_data(seed: str, nr: int, player: int):
-    tmpdir = make_tmpdir()
+    tmpdir = data_dir()
     datafile = tmpdir / f"{seed}-{nr}.json"
 
     if not datafile.exists():
@@ -73,7 +67,7 @@ def get_list_of_created_words(seed: str, nr: int):
     return '-' if player has not created a word yet
     always returns an array of length MAX_PLAYERS
     """
-    tmpdir = make_tmpdir()
+    tmpdir = data_dir()
 
     created_words = []
     for i in range(MAX_PLAYERS):
@@ -89,7 +83,7 @@ def get_list_of_created_words(seed: str, nr: int):
 
 def create_new_game(language, seed, nr, nr_players):
 
-    tmpdir = make_tmpdir()
+    tmpdir = data_dir()
 
     # clean up old round
     for i in range(MAX_PLAYERS):
@@ -100,7 +94,7 @@ def create_new_game(language, seed, nr, nr_players):
                 f.unlink()
 
     # load possible letters and words and shuffle
-    input_file = Path(f"games/krazy/resource/{language}.txt")
+    input_file = RESOURCES / f"{language}.txt"
     with input_file.open() as f:
         data = json.load(f)
         vowels = random.sample(data["vowels"], len(data["vowels"]))
@@ -193,7 +187,7 @@ def krazy_play(seed, nr, player):
     show the user the list of created words
 
     """
-    tmpdir = make_tmpdir()
+    tmpdir = data_dir()
 
     player = int(player)
     nr = int(nr)
@@ -224,7 +218,7 @@ def krazy_play(seed, nr, player):
 @krazy.route("/krazy/<seed>/<nr>/<player>", methods=["POST"])
 def krazy_play_submit(seed, nr, player):
     """Handle response from user play."""
-    tmpdir = make_tmpdir()
+    tmpdir = data_dir()
 
     player = int(player)
     nr = int(nr)
@@ -280,7 +274,7 @@ def krazy_play_submit(seed, nr, player):
 @krazy.route("/krazy/<seed>/<nr>/<player>/final")
 def krazy_final(seed, nr, player):
     """Show all guesses from all players."""
-    tmpdir = make_tmpdir()
+    tmpdir = data_dir()
 
     nr = int(nr)
     player = int(player)
@@ -288,7 +282,7 @@ def krazy_final(seed, nr, player):
     words, nr_players, language = load_game_data(seed, nr)
 
     # get ready for next round
-    tmpdir = make_tmpdir()
+    tmpdir = data_dir()
     datafile = tmpdir / f"{seed}-{nr + 1}.json"
 
     if not datafile.exists():

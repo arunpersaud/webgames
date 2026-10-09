@@ -1,25 +1,22 @@
-import os
-import sys
+"""Games to play with friends over a video call.
+
+Configuration comes from environment variables with a FLASK_ prefix:
+
+    FLASK_SECRET_KEY   signs the session cookie (flash messages)
+    FLASK_SECRET_SEED  mixed into every card deal, so deals can't be
+                       predicted from the session name alone
+    FLASK_DATA_DIR     where game state is stored (default: ./tmp)
+
+Both secrets are required unless the app runs in debug or testing mode.
+"""
 
 import secure
 from flask import Flask, render_template
 
-# import the different games
 from .boggle.views import boggle
 from .doko_skat.views import doko_skat
 from .krazy.views import krazy
 
-try:
-    from .config import DevelopmentConfig, ProductionConfig
-except ModuleNotFoundError:
-    print("Error: please copy config_template.py to config.py")
-    print("       and set the following variables:")
-    print("          SECRET_KEY  (random string)")
-    print("          SECRET_SEED (should be a string)")
-    sys.exit()
-
-
-app = Flask(__name__)
 # no CSP yet: boggle loads jquery from a CDN, krazy uses an inline script
 secure_headers = secure.Secure(
     xcto=secure.XContentTypeOptions(),
@@ -28,25 +25,30 @@ secure_headers = secure.Secure(
 )
 
 
-@app.after_request
-def set_secure_headers(response):
-    secure_headers.set_headers(response)
-    return response
+def create_app(test_config: dict | None = None) -> Flask:
+    app = Flask(__name__)
+    app.config["DATA_DIR"] = "tmp"
+    app.config.from_prefixed_env()
+    if test_config:
+        app.config.update(test_config)
 
+    for key in ("SECRET_KEY", "SECRET_SEED"):
+        if not app.config.get(key):
+            if not (app.debug or app.testing):
+                raise RuntimeError(f"FLASK_{key} is not set")
+            app.config[key] = f"insecure-dev-{key.lower()}"
 
-app.secret_key = os.urandom(12).hex()
-if app.debug:
-    app.config.from_object(DevelopmentConfig())
-    print(" * Using devel config")
-else:
-    app.config.from_object(ProductionConfig())
+    @app.after_request
+    def set_secure_headers(response):
+        secure_headers.set_headers(response)
+        return response
 
-# register the different games
-app.register_blueprint(boggle)
-app.register_blueprint(krazy)
-app.register_blueprint(doko_skat)
+    app.register_blueprint(boggle)
+    app.register_blueprint(krazy)
+    app.register_blueprint(doko_skat)
 
+    @app.route("/")
+    def main():
+        return render_template("index.html")
 
-@app.route("/")
-def main():
-    return render_template("index.html")
+    return app

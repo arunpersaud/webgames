@@ -24,7 +24,7 @@ Development uses [uv](https://docs.astral.sh/uv/):
 
     uv sync                 # create .venv with all dependencies
     uv run pytest           # run the tests
-    uv run flask --app games run --debug
+    uv run flask --app games run --debug   # http://localhost:5000
 
 We use [ruff](https://docs.astral.sh/ruff/) for linting and formatting. To run it
 automatically on every commit: `uvx pre-commit install`.

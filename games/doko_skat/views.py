@@ -9,6 +9,8 @@ from pathlib import Path
 
 from flask import Blueprint, abort, current_app, redirect, render_template, request
 
+from ..util import data_dir
+
 doko_skat = Blueprint(
     "doko_skat",
     __name__,
@@ -92,10 +94,10 @@ def doko_sort_cards_by_suit(cards: list[str]) -> tuple[list[str]]:
 def select_game_type(game_type: str) -> tuple[Path, dict]:
     """Return game specific settings."""
     if game_type == "doko":
-        db = Path("tmp") / "doko.db"
+        db = data_dir() / "doko.db"
         game = {"title": "Doppelkopf", "link": "doko"}
     else:
-        db = Path("tmp") / "skat.db"
+        db = data_dir() / "skat.db"
         game = {"title": "Skat", "link": "skat"}
     return db, game
 

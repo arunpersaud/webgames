@@ -1,10 +1,9 @@
 import random
 import time
-from pathlib import Path
 
 from flask import Blueprint, abort, redirect, render_template, request
 
-from ..util import nocache
+from ..util import data_dir, nocache
 
 boggle = Blueprint(
     "boggle",
@@ -76,7 +75,7 @@ def generate_5x5():
 
 
 def boggle_cleanup_tmp():
-    DIR = Path("tmp")
+    DIR = data_dir()
     now = time.time()
     for f in DIR.glob("*?x?.txt"):
         t = int(f.stat().st_mtime)
@@ -87,14 +86,14 @@ def boggle_cleanup_tmp():
 
 def generate_boggle_file(gen_func, filename):
     boggle_cleanup_tmp()
-    FILE = Path("tmp") / filename
+    FILE = data_dir() / filename
     boggle_text = gen_func()
     with FILE.open("w") as f:
         f.write(boggle_text)
 
 
 def load_boggle(filename):
-    FILE = Path("tmp") / filename
+    FILE = data_dir() / filename
     if not FILE.exists():
         return "", 0
     with FILE.open("r") as f:
@@ -121,7 +120,7 @@ def start_boggle(size, seed):
 def create_boggle(size, seed):
     if size not in SIZES:
         abort(404)
-    FILE = Path("tmp") / f"{seed}-{size}.txt"
+    FILE = data_dir() / f"{seed}-{size}.txt"
     if not FILE.exists():
         return "{-2}"
 

@@ -15,3 +15,23 @@ def test_security_headers(client):
 def test_static_files(client):
     assert client.get("/static/style.css").status_code == 200
     assert client.get("/games/boggle/static/boggle.js").status_code == 200
+
+
+def test_secrets_required_in_production(monkeypatch):
+    from games import create_app
+
+    monkeypatch.delenv("FLASK_SECRET_KEY", raising=False)
+    monkeypatch.delenv("FLASK_SECRET_SEED", raising=False)
+    with pytest.raises(RuntimeError, match="FLASK_SECRET_KEY"):
+        create_app()
+
+
+def test_config_from_environment(monkeypatch, tmp_path):
+    from games import create_app
+
+    monkeypatch.setenv("FLASK_SECRET_KEY", "k")
+    monkeypatch.setenv("FLASK_SECRET_SEED", "s")
+    monkeypatch.setenv("FLASK_DATA_DIR", str(tmp_path))
+    app = create_app()
+    assert app.config["SECRET_SEED"] == "s"
+    assert app.config["DATA_DIR"] == str(tmp_path)

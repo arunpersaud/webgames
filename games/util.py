@@ -1,7 +1,8 @@
 from datetime import datetime
 from functools import update_wrapper, wraps
+from pathlib import Path
 
-from flask import make_response
+from flask import current_app, make_response
 from werkzeug.http import http_date
 
 
@@ -28,3 +29,10 @@ def ensure_alphanum(input: str):
         if s.isalnum():
             out += s
     return out
+
+
+def data_dir() -> Path:
+    """Directory for game state (FLASK_DATA_DIR), created on first use."""
+    path = Path(current_app.config["DATA_DIR"])
+    path.mkdir(parents=True, exist_ok=True)
+    return path
