@@ -153,4 +153,4 @@ def update(size, seed):
     )
     if row is None:
         abort(404)
-    return {"started": row["started"]}
+    return {"version": row["started"]}

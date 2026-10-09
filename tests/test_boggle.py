@@ -19,25 +19,25 @@ def test_create_game(client, size):
 
 def test_restart_changes_timestamp(client):
     client.post("/boggle", data={"name": "g", "size": 4})
-    before = client.get("/boggle/4x4/g/update").json["started"]
+    before = client.get("/boggle/4x4/g/update").json["version"]
     assert before > 0
     response = client.post("/boggle/4x4/g/start")
     assert response.headers["Location"] == "/boggle/4x4/g"
-    after = client.get("/boggle/4x4/g/update").json["started"]
+    after = client.get("/boggle/4x4/g/update").json["version"]
     assert after >= before
 
 
 def test_shared_link_gets_a_board(client):
     page = client.get("/boggle/5x5/neverstarted").get_data(as_text=True)
     assert len(tiles(page)) == 25
-    assert client.get("/boggle/5x5/neverstarted/update").json["started"] > 0
+    assert client.get("/boggle/5x5/neverstarted/update").json["version"] > 0
 
 
 def test_restart_changes_board_time_immediately(client):
     client.post("/boggle", data={"name": "g", "size": 4})
-    before = client.get("/boggle/4x4/g/update").json["started"]
+    before = client.get("/boggle/4x4/g/update").json["version"]
     client.post("/boggle/4x4/g/start")
-    assert client.get("/boggle/4x4/g/update").json["started"] > before
+    assert client.get("/boggle/4x4/g/update").json["version"] > before
 
 
 def test_no_cache_on_updates(client):

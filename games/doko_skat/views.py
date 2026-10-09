@@ -19,7 +19,7 @@ from flask import (
 )
 
 from .. import db
-from ..util import ensure_alphanum
+from ..util import ensure_alphanum, nocache
 
 doko_skat = Blueprint(
     "doko_skat",
@@ -151,8 +151,20 @@ def display_game(
     seen = seen_hands(game_type, seed, nr)
     players = {player: player in seen for player in game["players"]}
     return render_template(
-        "doko-start.html", seed=seed, nr=nr, players=players, game=game
+        "doko-start.html",
+        seed=seed,
+        nr=nr,
+        players=players,
+        game=game,
+        version=",".join(sorted(seen)),
     )
+
+
+@doko_skat.route("/<any(doko, skat):game_type>/<name:seed>/<int:nr>/status")
+@nocache
+def game_status(game_type, seed, nr):
+    """Polled by the overview page, to reload when someone looked at a hand."""
+    return {"version": ",".join(sorted(seen_hands(game_type, seed, nr)))}
 
 
 @doko_skat.route("/<any(doko, skat):game_type>", methods=["POST"])

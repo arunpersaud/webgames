@@ -6,12 +6,13 @@
   {% include "howto_" ~ game.link ~ ".html" %}
 
   <h2>Game number {{ nr }} in '{{ seed }}'</h2>
-  <ul>
+  <ul data-version="{{ version }}"
+      data-poll="{{ url_for('doko_skat.game_status', game_type=game.link, seed=seed, nr=nr) }}">
     {% for name, viewed in players.items() %}
     <li><a href="{{ url_for('doko_skat.display_cards', game_type=game.link, seed=seed, nr=nr, player=name) }}">Player {{ name }}</a>
       ({{ "viewed" if viewed else "not viewed" }})</li>
     {% endfor %}
   </ul>
 
-  <p>You can keep this page open or reload it to see if everyone has seen their cards.</p>
+  <p>Keep this page open to see when everyone has seen their cards; it updates by itself.</p>
 {% endblock %}

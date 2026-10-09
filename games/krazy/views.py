@@ -16,7 +16,7 @@ from flask import (
 )
 
 from .. import db
-from ..util import ensure_alphanum
+from ..util import ensure_alphanum, nocache
 
 krazy = Blueprint(
     "krazy",
@@ -268,6 +268,20 @@ def krazy_play_submit(seed, nr, player):
     return redirect(url_for("krazy.krazy_final", seed=seed, nr=nr, player=player))
 
 
+def guess_version(seed: str, nr: int) -> str:
+    """Changes whenever a player submits a guess."""
+    plays = load_plays(seed, nr)
+    return ",".join(str(p) for p in sorted(plays) if plays[p]["guess"] is not None)
+
+
+@krazy.route("/krazy/<name:seed>/<int:nr>/status")
+@nocache
+def round_status(seed, nr):
+    """Polled by the results page, to reload when a new guess comes in."""
+    load_round(seed, nr)  # 404 for unknown rounds
+    return {"version": guess_version(seed, nr)}
+
+
 @krazy.route("/krazy/<name:seed>/<int:nr>/<int:player>/final")
 def krazy_final(seed, nr, player):
     """Show all guesses from all players."""
@@ -297,4 +311,5 @@ def krazy_final(seed, nr, player):
         player=player,
         player_name=player_name,
         guesses=guesses,
+        version=guess_version(seed, nr),
     )

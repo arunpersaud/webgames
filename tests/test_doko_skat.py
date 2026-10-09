@@ -100,3 +100,18 @@ def test_empty_session_name(client):
     response = client.post("/skat", data={"name": "!?"}, follow_redirects=True)
     assert response.request.path == "/skat"
     assert "Please enter a session name" in response.get_data(as_text=True)
+
+
+def test_status_changes_when_a_hand_is_seen(client):
+    status = client.get("/skat/s1/1/status")
+    assert status.json == {"version": ""}
+    assert "no-store" in status.headers["Cache-Control"]
+    overview = client.get("/skat/s1/1/").get_data(as_text=True)
+    assert 'data-version=""' in overview
+    assert 'data-poll="/skat/s1/1/status"' in overview
+
+    hand(client, "skat", "s1", 1, "skat")
+    hand(client, "skat", "s1", 1, "B")
+    assert client.get("/skat/s1/1/status").json == {"version": "B,skat"}
+    overview = client.get("/skat/s1/1/").get_data(as_text=True)
+    assert 'data-version="B,skat"' in overview

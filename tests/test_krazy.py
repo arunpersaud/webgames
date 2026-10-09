@@ -113,3 +113,25 @@ def test_new_game_with_old_name_starts_over(client):
     assert client.get("/krazy/krazy1/2").status_code == 404
     page = client.get("/krazy/krazy1/1/0").get_data(as_text=True)
     assert 'id="sortableList"' in page  # player 0 has to build a word again
+
+
+def test_status_changes_with_guesses(client):
+    start(client)
+    assert client.get("/krazy/nothere/1/status").status_code == 404
+    assert client.get("/krazy/krazy1/1/status").json == {"version": ""}
+    page = client.get("/krazy/krazy1/1/0/final").get_data(as_text=True)
+    assert 'data-poll="/krazy/krazy1/1/status"' in page
+
+    for p in range(3):  # everyone builds an empty word
+        client.post(f"/krazy/krazy1/1/{p}", data={"myword": ""})
+    assert client.get("/krazy/krazy1/1/status").json == {"version": ""}
+
+    page = client.get("/krazy/krazy1/1/2").get_data(as_text=True)
+    selects = re.findall(r'<select name="([\w-]+)"[^>]*>(.*?)</select>', page, re.S)
+    data, used = {}, set()
+    for name, options in selects:
+        value = next(v for v in re.findall(r'value="(\d+)"', options) if v not in used)
+        used.add(value)
+        data[name] = value
+    client.post("/krazy/krazy1/1/2", data=data)
+    assert client.get("/krazy/krazy1/1/status").json == {"version": "2"}

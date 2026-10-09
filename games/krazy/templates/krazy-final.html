@@ -3,7 +3,8 @@
 {% block content %}
   <h1>Krazy Words &ndash; end of round {{ nr }}</h1>
 
-  <div class="overflow-auto">
+  <div class="overflow-auto" data-version="{{ version }}"
+       data-poll="{{ url_for('krazy.round_status', seed=seed, nr=nr) }}">
     <table class="striped">
       <thead>
         <tr>
@@ -25,7 +26,7 @@
     </table>
   </div>
 
-  <p>Please reload when all players made their guesses.</p>
+  <p>This table updates by itself when more players submit their guesses.</p>
 
   <p><a role="button" href="{{ url_for('krazy.krazy_play', seed=seed, nr=nr + 1, player=player) }}">Next round</a></p>
   <p>To start a completely new game, please visit the <a href="{{ url_for('krazy.krazy_start') }}">starting page</a> again.</p>

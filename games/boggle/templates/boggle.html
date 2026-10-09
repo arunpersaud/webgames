@@ -26,8 +26,8 @@
 
   <p class="timer">Time left: <span id="timer" data-seconds="{{ remaining }}">{{ "%d:%02d" % (remaining // 60, remaining % 60) }}</span></p>
 
-  <table id="boggle" data-started="{{ started }}"
-         data-update="{{ url_for('boggle.update', size=size, seed=seed) }}">
+  <table id="boggle" data-version="{{ started }}" data-poll-interval="1000"
+         data-poll="{{ url_for('boggle.update', size=size, seed=seed) }}">
     {% for i in range(n) %}
     <tr>
       {% for j in range(n) %}
