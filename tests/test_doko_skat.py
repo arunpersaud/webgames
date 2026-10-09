@@ -81,7 +81,7 @@ def test_old_games_are_cleaned_up(app, client):
         "/doko/s1/-1/A",
         "/doko/s_1/1/A",
         "/poker",
-        "/favicon.ico",
+        "/whatever",
     ],
 )
 def test_invalid_urls(client, url):

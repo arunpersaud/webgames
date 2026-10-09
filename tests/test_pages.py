@@ -20,6 +20,8 @@ def test_security_headers(client):
 
 
 def test_static_files(client):
+    assert client.get("/favicon.ico").status_code == 200
+    assert client.get("/static/favicon.svg").mimetype == "image/svg+xml"
     assert client.get("/static/style.css").status_code == 200
     assert client.get("/games/boggle/static/boggle.js").status_code == 200
 

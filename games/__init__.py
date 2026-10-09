@@ -73,4 +73,8 @@ def create_app(test_config: dict | None = None) -> Flask:
     def main():
         return render_template("index.html")
 
+    @app.route("/favicon.ico")
+    def favicon():
+        return app.send_static_file("favicon.ico")
+
     return app
