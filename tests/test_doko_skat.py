@@ -3,6 +3,8 @@ from collections import Counter
 
 import pytest
 
+from games.db import get_db
+
 
 def hand(client, game, seed, nr, player):
     """Cards shown to a player (first list on the page, before the by-suit one)."""
@@ -47,10 +49,26 @@ def test_deals_differ_per_game_and_session(client):
     assert hand(client, "doko", "s1", 3, "A") != hand(client, "doko", "s2", 3, "A")
 
 
-def test_deal_is_deterministic(client, tmp_path):
+def test_deal_is_deterministic(app, client):
     first = hand(client, "doko", "s1", 1, "A")
-    (tmp_path / "doko.db").write_text("")  # forget the "seen" tag
+    with app.app_context():
+        get_db().execute("DELETE FROM hand_seen")
     assert hand(client, "doko", "s1", 1, "A") == first
+
+
+def test_seen_hands_are_per_game_number(client):
+    """Game 1 being seen must not block game 10 (old prefix-match bug)."""
+    hand(client, "doko", "s1", 1, "A")
+    hand(client, "doko", "s1", 10, "A")
+    hand(client, "skat", "s1", 1, "A")
+
+
+def test_old_games_are_cleaned_up(app, client):
+    hand(client, "doko", "s1", 1, "A")
+    with app.app_context():
+        get_db().execute("UPDATE hand_seen SET seen = seen - 8 * 24 * 3600")
+    client.post("/doko", data={"name": "s2"})  # a new session triggers cleanup
+    hand(client, "doko", "s1", 1, "A")
 
 
 @pytest.mark.parametrize(

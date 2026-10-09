@@ -103,3 +103,13 @@ def test_every_player_gets_nine_letters(client, players):
     for p in range(players):
         page = client.get(f"/krazy/krazy1/1/{p}").get_data(as_text=True)
         assert len(letters(page)) == 9
+
+
+def test_new_game_with_old_name_starts_over(client):
+    start(client)
+    client.post("/krazy/krazy1/1/0", data={"myword": ""})
+    client.get("/krazy/krazy1/1/0/final")  # creates round 2
+    start(client)
+    assert client.get("/krazy/krazy1/2").status_code == 404
+    page = client.get("/krazy/krazy1/1/0").get_data(as_text=True)
+    assert 'id="sortableList"' in page  # player 0 has to build a word again

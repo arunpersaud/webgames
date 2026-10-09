@@ -1,9 +1,11 @@
 import random
+import sqlite3
 import time
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
-from ..util import data_dir, ensure_alphanum, nocache
+from .. import db
+from ..util import ensure_alphanum, nocache
 
 boggle = Blueprint(
     "boggle",
@@ -73,54 +75,47 @@ def generate_5x5():
     return boggle_text
 
 
-def boggle_cleanup_tmp():
-    DIR = data_dir()
-    now = time.time()
-    for f in DIR.glob("*?x?.txt"):
-        t = int(f.stat().st_mtime)
-        # delete everything older than 1h
-        if now - t > 60 * 60:
-            f.unlink()
+def new_board(seed: str, size: str) -> None:
+    """Roll the dice for a new board (replaces an existing one)."""
+    letters = generate_4x4() if size == "4x4" else generate_5x5()
+    db.cleanup()
+    # started must grow, so that every open page notices the new board
+    db.get_db().execute(
+        """INSERT INTO boggle VALUES (?, ?, ?, ?)
+           ON CONFLICT DO UPDATE SET letters = excluded.letters,
+               started = max(excluded.started, boggle.started + 1)""",
+        (seed, size, letters, time.time_ns() // 1_000_000),
+    )
 
 
-def generate_boggle_file(gen_func, filename):
-    boggle_cleanup_tmp()
-    FILE = data_dir() / filename
-    boggle_text = gen_func()
-    with FILE.open("w") as f:
-        f.write(boggle_text)
-
-
-def load_boggle(filename):
-    FILE = data_dir() / filename
-    if not FILE.exists():
-        return "", 0
-    with FILE.open("r") as f:
-        boggle_text = f.read()
-    boggle_text = boggle_text.split(",")
-    t = int(FILE.stat().st_mtime)
-    return boggle_text, t
+def load_board(seed: str, size: str) -> sqlite3.Row:
+    """The current board; anyone with the link gets one if it doesn't exist."""
+    query = "SELECT letters, started FROM boggle WHERE seed = ? AND size = ?"
+    row = db.get_db().execute(query, (seed, size)).fetchone()
+    if row is None:
+        new_board(seed, size)
+        row = db.get_db().execute(query, (seed, size)).fetchone()
+    return row
 
 
 @boggle.route("/boggle/<any(4x4, 5x5):size>/<name:seed>/start")
 @nocache
 def start_boggle(size, seed):
-    if size == "4x4":
-        generate_boggle_file(generate_4x4, f"{seed}-{size}.txt")
-    else:
-        generate_boggle_file(generate_5x5, f"{seed}-{size}.txt")
+    new_board(seed, size)
     return "{started: 1}"
 
 
 @boggle.route("/boggle/<any(4x4, 5x5):size>/<name:seed>/update")
 @nocache
 def create_boggle(size, seed):
-    FILE = data_dir() / f"{seed}-{size}.txt"
-    if not FILE.exists():
+    row = (
+        db.get_db()
+        .execute("SELECT started FROM boggle WHERE seed = ? AND size = ?", (seed, size))
+        .fetchone()
+    )
+    if row is None:
         return "{-2}"
-
-    last = int(FILE.stat().st_mtime)
-    return str(last)
+    return str(row["started"])
 
 
 @boggle.route("/boggle", methods=["POST"])
@@ -134,21 +129,22 @@ def create_boggle_game():
         return redirect(url_for("boggle.boggle_4x4"))
 
     size = f"{size}x{size}"
-    generator = generate_4x4 if size == "4x4" else generate_5x5
-    generate_boggle_file(generator, f"{seed}-{size}.txt")
+    new_board(seed, size)
     return redirect(url_for("boggle.boggle_4x4", size=size, seed=seed))
 
 
 @boggle.route("/boggle/<any(4x4, 5x5):size>/<name:seed>")
 @boggle.route("/boggle")
 def boggle_4x4(seed=None, size="4x4"):
-
     if seed is not None:
         s = 4 if size == "4x4" else 5
-
-        boggle_text, t = load_boggle(f"{seed}-{size}.txt")
+        board = load_board(seed, size)
         return render_template(
-            "boggle.html", boggle=boggle_text, fileage=t, size=s, seed=seed
+            "boggle.html",
+            boggle=board["letters"].split(","),
+            fileage=board["started"],
+            size=s,
+            seed=seed,
         )
 
     return render_template("boggle-start.html", seed=seed)

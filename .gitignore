@@ -1,10 +1,6 @@
 *~
-*pyc
-games/config.py
-tmp
-public
-__pycache__
-.mypy_cache
-.htaccess.venv
-.pytest_cache
-.ruff_cache
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+instance/

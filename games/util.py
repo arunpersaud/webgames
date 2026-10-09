@@ -1,8 +1,7 @@
 from datetime import datetime
 from functools import update_wrapper, wraps
-from pathlib import Path
 
-from flask import current_app, make_response
+from flask import make_response
 from werkzeug.http import http_date
 from werkzeug.routing import BaseConverter
 
@@ -31,10 +30,3 @@ class SessionNameConverter(BaseConverter):
     """URL part <name:seed>: a session name made by ensure_alphanum()."""
 
     regex = r"[^\W_]+"
-
-
-def data_dir() -> Path:
-    """Directory for game state (FLASK_DATA_DIR), created on first use."""
-    path = Path(current_app.config["DATA_DIR"])
-    path.mkdir(parents=True, exist_ok=True)
-    return path

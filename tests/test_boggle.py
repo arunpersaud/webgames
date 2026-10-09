@@ -26,6 +26,19 @@ def test_restart_changes_timestamp(client):
     assert after >= before
 
 
+def test_shared_link_gets_a_board(client):
+    page = client.get("/boggle/5x5/neverstarted").get_data(as_text=True)
+    assert len(tiles(page)) == 25
+    assert int(client.get("/boggle/5x5/neverstarted/update").data) > 0
+
+
+def test_restart_changes_board_time_immediately(client):
+    client.post("/boggle", data={"name": "g", "size": 4})
+    before = int(client.get("/boggle/4x4/g/update").data)
+    client.get("/boggle/4x4/g/start")
+    assert int(client.get("/boggle/4x4/g/update").data) > before
+
+
 def test_no_cache_on_updates(client):
     client.post("/boggle", data={"name": "g", "size": 4})
     headers = client.get("/boggle/4x4/g/update").headers

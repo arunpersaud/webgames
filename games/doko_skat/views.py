@@ -5,7 +5,7 @@ Blueprint for playing Skat and Doppelkopf online.
 """
 
 import random
-from pathlib import Path
+import time
 
 from flask import (
     Blueprint,
@@ -18,7 +18,8 @@ from flask import (
     url_for,
 )
 
-from ..util import data_dir, ensure_alphanum
+from .. import db
+from ..util import ensure_alphanum
 
 doko_skat = Blueprint(
     "doko_skat",
@@ -100,44 +101,39 @@ def doko_sort_cards_by_suit(cards: list[str]) -> tuple[list[str]]:
     return my_clubs, my_spades, my_hearts, my_diamonds
 
 
-def select_game_type(game_type: str) -> tuple[Path, dict]:
-    """Return game specific settings."""
-    if game_type == "doko":
-        db = data_dir() / "doko.db"
-        game = {"title": "Doppelkopf", "link": "doko"}
-    else:
-        db = data_dir() / "skat.db"
-        game = {"title": "Skat", "link": "skat"}
-    return db, game
+GAMES = {
+    "doko": {"title": "Doppelkopf", "link": "doko", "players": ("A", "B", "C", "D")},
+    "skat": {"title": "Skat", "link": "skat", "players": ("A", "B", "C", "skat")},
+}
 
 
-def tag_exists(tag: str, db: Path) -> bool:
-    """Check if tag is in database.
+def seen_hands(game: str, seed: str, nr: int) -> set[str]:
+    """Players whose hand was already shown in this game."""
+    rows = db.get_db().execute(
+        "SELECT player FROM hand_seen WHERE game = ? AND seed = ? AND nr = ?",
+        (game, seed, nr),
+    )
+    return {row["player"] for row in rows}
 
-    Assumes a file based storage/db.
+
+def mark_seen(game: str, seed: str, nr: int, player: str) -> bool:
+    """Record that a hand is shown; False if it was shown before.
+
+    One statement, so two people opening the same hand at the same time
+    can't both see it.
     """
-    if db.exists():
-        with db.open("r") as f:
-            for line in f:
-                if line.startswith(tag):
-                    return True
-    return False
-
-
-def add_tag(tag: str, db: Path) -> None:
-    """Add a tag to the database."""
-    if db.exists():
-        with db.open("a") as f:
-            f.write(f"{tag}\n")
+    cursor = db.get_db().execute(
+        "INSERT OR IGNORE INTO hand_seen VALUES (?, ?, ?, ?, ?)",
+        (game, seed, nr, player, time.time()),
+    )
+    return cursor.rowcount == 1
 
 
 @doko_skat.route("/<any(doko, skat):game_type>")
 def doko(game_type="doko"):
     """Page to start a new game."""
 
-    _, game = select_game_type(game_type)
-
-    return render_template("doko.html", game=game)
+    return render_template("doko.html", game=GAMES[game_type])
 
 
 @doko_skat.route("/<any(doko, skat):game_type>/<name:seed>/<int:nr>/")
@@ -151,16 +147,9 @@ def display_game(
     Show a page for the current game to see who already looked
     at their hand and who hasn't
     """
-    STORAGE, game = select_game_type(game_type)
-
-    if game_type == "doko":
-        players = {"A": False, "B": False, "C": False, "D": False}
-    else:
-        players = {"A": False, "B": False, "C": False, "skat": False}
-    for player in players:
-        tag = f"{seed} {player} {nr}"
-        if tag_exists(tag, STORAGE):
-            players[player] = True
+    game = GAMES[game_type]
+    seen = seen_hands(game_type, seed, nr)
+    players = {player: player in seen for player in game["players"]}
     return render_template(
         "doko-start.html", seed=seed, nr=nr, players=players, game=game
     )
@@ -178,6 +167,7 @@ def start_game(
     if not seed:
         flash("Please enter a session name")
         return redirect(url_for("doko_skat.doko", game_type=game_type))
+    db.cleanup()
     return redirect(
         url_for("doko_skat.display_game", game_type=game_type, seed=seed, nr=1)
     )
@@ -192,20 +182,14 @@ def display_cards(
 ):
     """Handle request from player to see cards.
 
-    We write a tag into our database (just a text file) to see
-    if the someone already requested the web page, if so we show
-    an error, otherwise, we render the cards
+    Each hand is shown only once: the first request is recorded in the
+    database, later requests get an error page.
     """
-    valid_players = (
-        ("A", "B", "C", "D") if game_type == "doko" else ("A", "B", "C", "skat")
-    )
-    if player not in valid_players:
+    game = GAMES[game_type]
+    if player not in game["players"]:
         abort(404)
 
-    STORAGE, game = select_game_type(game_type)
-
-    tag = f"{seed} {player} {nr}"
-    if tag_exists(tag, STORAGE):
+    if not mark_seen(game_type, seed, nr, player):
         return render_template("doko-single-error.html", game=game)
 
     if game_type == "doko":
@@ -214,8 +198,6 @@ def display_cards(
         cards = get_skat_cards(seed, nr, player)
 
     suit = doko_sort_cards_by_suit(cards)
-    # register page as visited
-    add_tag(tag, STORAGE)
 
     return render_template(
         "doko-game.html",

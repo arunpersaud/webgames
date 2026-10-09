@@ -5,14 +5,18 @@ Configuration comes from environment variables with a FLASK_ prefix:
     FLASK_SECRET_KEY   signs the session cookie (flash messages)
     FLASK_SECRET_SEED  mixed into every card deal, so deals can't be
                        predicted from the session name alone
-    FLASK_DATA_DIR     where game state is stored (default: ./tmp)
+    FLASK_DATABASE     SQLite file for the game state
+                       (default: instance/webgames.sqlite)
 
 Both secrets are required unless the app runs in debug or testing mode.
 """
 
+import os
+
 import secure
 from flask import Flask, render_template
 
+from . import db
 from .boggle.views import boggle
 from .doko_skat.views import doko_skat
 from .krazy.views import krazy
@@ -28,7 +32,7 @@ secure_headers = secure.Secure(
 
 def create_app(test_config: dict | None = None) -> Flask:
     app = Flask(__name__)
-    app.config["DATA_DIR"] = "tmp"
+    app.config["DATABASE"] = os.path.join(app.instance_path, "webgames.sqlite")
     app.config.from_prefixed_env()
     if test_config:
         app.config.update(test_config)
@@ -39,6 +43,7 @@ def create_app(test_config: dict | None = None) -> Flask:
                 raise RuntimeError(f"FLASK_{key} is not set")
             app.config[key] = f"insecure-dev-{key.lower()}"
 
+    db.init_app(app)
     app.url_map.converters["name"] = SessionNameConverter
 
     @app.after_request

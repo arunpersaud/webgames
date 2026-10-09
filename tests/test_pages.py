@@ -31,7 +31,7 @@ def test_config_from_environment(monkeypatch, tmp_path):
 
     monkeypatch.setenv("FLASK_SECRET_KEY", "k")
     monkeypatch.setenv("FLASK_SECRET_SEED", "s")
-    monkeypatch.setenv("FLASK_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("FLASK_DATABASE", str(tmp_path / "games.sqlite"))
     app = create_app()
     assert app.config["SECRET_SEED"] == "s"
-    assert app.config["DATA_DIR"] == str(tmp_path)
+    assert (tmp_path / "games.sqlite").exists()
