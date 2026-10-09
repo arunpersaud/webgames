@@ -95,3 +95,11 @@ def test_wrong_letters_are_rejected(client):
     assert response.status_code == 302
     page = client.get("/krazy/krazy1/1/0").get_data(as_text=True)
     assert "not in your list of letters" in page
+
+
+@pytest.mark.parametrize("players", [1, 3, 7])
+def test_every_player_gets_nine_letters(client, players):
+    start(client, players)
+    for p in range(players):
+        page = client.get(f"/krazy/krazy1/1/{p}").get_data(as_text=True)
+        assert len(letters(page)) == 9

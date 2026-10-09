@@ -84,6 +84,12 @@ def get_list_of_created_words(seed: str, nr: int):
     return created_words
 
 
+def draw_letters(pool: list[str], n: int, rng: random.Random) -> list[str]:
+    """n random letters from pool, using several copies of pool if it is too small."""
+    copies = -(-n // len(pool))
+    return rng.sample(pool * copies, n)
+
+
 def create_new_game(language, seed, nr, nr_players):
     rng = random.Random(seed + str(nr) + current_app.config["SECRET_SEED"])
 
@@ -101,8 +107,8 @@ def create_new_game(language, seed, nr, nr_players):
     input_file = RESOURCES / f"{language}.txt"
     with input_file.open() as f:
         data = json.load(f)
-        vowels = rng.sample(data["vowels"], len(data["vowels"]))
-        consonants = rng.sample(data["consonants"], len(data["consonants"]))
+        vowels = draw_letters(data["vowels"], 3 * nr_players, rng)
+        consonants = draw_letters(data["consonants"], 6 * nr_players, rng)
         words = rng.sample(data["words"], len(data["words"]))
 
     # create session file that stores the data for each player and a
